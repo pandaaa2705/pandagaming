@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enchanted Tales - A Magical Storytelling Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating stars */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .particle::before {
+            content: '✨';
+            font-size: 20px;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.3; }
+            50% { transform: translateY(-30px) translateX(15px); opacity: 0.8; }
+        }
+
+        /* Main container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 182, 193, 0.8), 0 0 40px rgba(138, 43, 226, 0.6);
+            letter-spacing: 2px;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 182, 193, 0.8), 0 0 40px rgba(138, 43, 226, 0.6); }
+            50% { text-shadow: 0 0 30px rgba(255, 182, 193, 1), 0 0 50px rgba(138, 43, 226, 0.8), 0 0 70px rgba(255, 105, 180, 0.6); }
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            font-weight: 300;
+            opacity: 0.95;
+            letter-spacing: 1px;
+        }
+
+        /* Button styles */
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.5);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Gallery */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .gallery-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .gallery-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .gallery-item-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .gallery-item p {
+            font-size: 0.95em;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2em;
+            }
+
+            .panda-interactions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .game-container {
+                height: 250px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+        }
+
+        /* Floating hearts */
+        .heart {
+            position: absolute;
+            font-size: 2em;
+            opacity: 0.4;
+            animation: floatHeart 4s ease-in infinite;
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-80vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Animated Panda */
+        .panda-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            cursor: pointer;
+            animation: pandaBounce 3s ease-in-out infinite;
+        }
+
+        .panda {
+            font-size: 5em;
+            filter: drop-shadow(0 0 15px rgba(255, 179, 217, 0.6));
+            transition: all 0.3s ease;
+        }
+
+        .panda-container:hover .panda {
+            transform: scale(1.2) rotate(10deg);
+            filter: drop-shadow(0 0 25px rgba(255, 179, 217, 0.9));
+        }
+
+        .panda-container:active .panda {
+            transform: scale(0.95);
+        }
+
+        @keyframes pandaBounce {
+            0%, 100% {
+                transform: translateY(0) rotate(-5deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        .panda-bubble {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            white-space: nowrap;
+            opacity: 0;
+            animation: bubbleAppear 0.5s ease forwards;
+            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes bubbleAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(10px) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .panda-container.speaking .panda-bubble {
+            animation: bubbleAppear 0.5s ease forwards, bubbleFloat 2s ease 0.5s forwards;
+        }
+
+        @keyframes bubbleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.8);
+            }
+        }
+
+        /* Panda Friend Styles */
+        .panda-friend-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            box-shadow: 0 8px 32px rgba(138, 43, 226, 0.3);
+            transition: all 0.3s ease;
+            animation: slideUp 1s ease-out;
+        }
+
+        .panda-friend-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 40px rgba(255, 105, 180, 0.4);
+        }
+
+        .panda-display {
+            font-size: 8em;
+            min-width: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pandaDanceAnim 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(255, 179, 217, 0.6));
+        }
+
+        @keyframes pandaDanceAnim {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1) rotate(0deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .panda-display.jumping {
+            animation: pandaJump 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+        }
+
+        @keyframes pandaJump {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-60px) scale(1.2); }
+        }
+
+        .panda-display.spinning {
+            animation: pandaSpin 1s linear !important;
+        }
+
+        @keyframes pandaSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .panda-display.dancing {
+            animation: pandaDancing 0.4s ease-in-out infinite !important;
+        }
+
+        @keyframes pandaDancing {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-15px) rotate(-10deg); }
+            75% { transform: translateX(15px) rotate(10deg); }
+        }
+
+        .panda-display.eating {
+            animation: pandaEating 0.8s ease-in-out infinite !important;
+        }
+
+        @keyframes pandaEating {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.15) rotate(-5deg); }
+        }
+
+        .panda-display.sleeping {
+            animation: pandaSleeping 1.5s ease-in-out infinite !important;
+        }
+
+        @keyframes pandaSleeping {
+            0%, 100% { transform: rotate(-30deg) scale(0.95); }
+            50% { transform: rotate(-30deg) scale(1); }
+        }
+
+        .panda-display.waving {
+            animation: pandaWaving 0.8s ease-in-out infinite !important;
+        }
+
+        @keyframes pandaWaving {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg) scaleX(-1); }
+            75% { transform: rotate(-20deg) scaleX(-1); }
+        }
+
+        .panda-info {
+            flex: 1;
+            color: white;
+        }
+
+        .panda-info h3 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: #ffb3d9;
+            text-shadow: 0 0 10px rgba(255, 179, 217, 0.6);
+        }
+
+        .panda-info p {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .emotion-meter {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .emotion-meter #pandaMood {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        /* Interaction Buttons */
+        .panda-interactions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .interaction-btn {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.8), rgba(245, 87, 108, 0.8));
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 20px 15px;
+            border-radius: 20px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .interaction-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.5);
+            border-color: rgba(255, 255, 255, 0.6);
+            background: linear-gradient(135deg, rgba(240, 147, 251, 1), rgba(245, 87, 108, 1));
+        }
+
+        .interaction-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Game Area */
+        .game-area {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(138, 43, 226, 0.3);
+            animation: slideUp 1s ease-out;
+        }
+
+        .game-area h3 {
+            color: #ffb3d9;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px rgba(255, 179, 217, 0.6);
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .bamboo {
+            position: absolute;
+            font-size: 3em;
+            cursor: pointer;
+            user-select: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+        }
+
+        .bamboo:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+            filter: drop-shadow(0 0 10px rgba(255, 179, 217, 0.8));
+        }
+
+        .game-area p {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Floating hearts */
+        .heart {
+            position: absolute;
+            font-size: 2em;
+            opacity: 0.4;
+            animation: floatHeart 4s ease-in infinite;
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-80vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .panda-friend-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .panda-display {
+                font-size: 5em;
+            }
+
+            .panda-interactions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .game-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Floating particles -->
+    <div class="particle" style="top: 10%; left: 10%;"></div>
+    <div class="particle" style="top: 20%; right: 15%;"></div>
+    <div class="particle" style="bottom: 20%; left: 5%;"></div>
+    <div class="particle" style="bottom: 10%; right: 10%;"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">✨ Enchanted Tales ✨</div>
+            <p class="subtitle">Where Dreams Come to Life</p>
+        </header>
+
+            <!-- Panda Game Portal Button -->
+            <div style="text-align: center; margin-bottom: 50px;">
+                <a href="games.html" style="display: inline-block; padding: 20px 50px; background: linear-gradient(135deg, #FFD700, #FFA500); color: #333; text-decoration: none; border-radius: 30px; font-size: 1.5em; font-weight: bold; box-shadow: 0 8px 32px rgba(255, 215, 0, 0.5); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    🎮 ENTER GAME KINGDOM 🎮
+                </a>
+            </div>
+
+        <!-- Panda Friend Section -->
+        <div style="margin-top: 60px;">
+            <h2 style="font-size: 2em; margin-bottom: 30px; text-align: center; text-shadow: 0 0 10px rgba(255, 179, 217, 0.6);">🐼 Meet My Friend Panda! 🐼</h2>
+            
+            <div class="panda-friend-card">
+                <div class="panda-display" id="pandaDisplay">🐼</div>
+                <div class="panda-info">
+                    <h3 id="pandaName">Hi! I'm Pandi!</h3>
+                    <p id="pandaStatus">Welcome to my magical kingdom of stories!</p>
+                    <div class="emotion-meter">
+                        <span id="pandaMood">😊</span> Mood: <span id="pandaMoodText">Happy</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panda Interactions -->
+            <div class="panda-interactions">
+                <button class="interaction-btn" onclick="pandaPlay()">
+                    <span style="font-size: 1.5em;">🎮</span><br>Play with Panda
+                </button>
+                <button class="interaction-btn" onclick="pandaPets()">
+                    <span style="font-size: 1.5em;">🤗</span><br>Pet Panda
+                </button>
+                <button class="interaction-btn" onclick="pandaDance()">
+                    <span style="font-size: 1.5em;">💃</span><br>Dance
+                </button>
+                <button class="interaction-btn" onclick="pandaFeed()">
+                    <span style="font-size: 1.5em;">🎋</span><br>Feed Bamboo
+                </button>
+                <button class="interaction-btn" onclick="pandaTrick()">
+                    <span style="font-size: 1.5em;">🎪</span><br>Cute Trick
+                </button>
+                <button class="interaction-btn" onclick="pandaSleep()">
+                    <span style="font-size: 1.5em;">😴</span><br>Rest Panda
+                </button>
+            </div>
+
+            <!-- Panda Game Area -->
+            <div id="gameArea" class="game-area" style="display: none;">
+                <h3>🎯 Catch the Bamboo Game!</h3>
+                <div class="game-container" id="gameContainer">
+                    <div class="bamboo" id="bamboo">🎋</div>
+                </div>
+                <p id="gameScore">Score: 0</p>
+                <button class="btn" onclick="endGame()">Stop Playing</button>
+            </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div style="text-align: center; margin-top: 60px;">
+            <h2 style="font-size: 2em; margin-bottom: 30px; text-shadow: 0 0 10px rgba(255, 179, 217, 0.6);">✨ Explore the Magic ✨</h2>
+            <div class="gallery">
+                <div class="gallery-item">
+                    <div class="gallery-item-icon">🧚</div>
+                    <p>Fairy Tale</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-item-icon">🌙</div>
+                    <p>Moonlight</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-item-icon">🦋</div>
+                    <p>Butterfly Magic</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-item-icon">🌸</div>
+                    <p>Enchanted Garden</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate stars
+        function generateStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Generate floating hearts
+        function generateHearts() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = '💖';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.bottom = '-50px';
+                heart.style.animationDelay = (Math.random() * 0.5) + 's';
+                document.body.appendChild(heart);
+
+                setTimeout(() => heart.remove(), 5000);
+            }, 3000);
+        }
+
+        // Panda State Management
+        let pandaState = {
+            name: "Pandi",
+            mood: "happy",
+            energy: 100,
+            happiness: 100,
+            gameScore: 0,
+            isPlaying: false
+        };
+
+        const moodEmojis = {
+            happy: "😊",
+            excited: "🤩",
+            tired: "😴",
+            playful: "🤪",
+            loved: "🥰",
+            dancing: "💃",
+            eating: "😋",
+            sleeping: "😴"
+        };
+
+        const pandaLines = {
+            introduction: [
+                "Hi there! I'm Pandi the Magic Panda! 🐼",
+                "Welcome to the enchanted forest!",
+                "I love stories and making friends!",
+                "Let's go on an adventure together!"
+            ],
+            play: [
+                "Yay! Let's play! 🎮",
+                "This is so much fun!",
+                "Can you catch them all?",
+                "You're amazing at this!"
+            ],
+            pet: [
+                "That feels so nice! 😊",
+                "I love your hugs!",
+                "More belly rubs, please!",
+                "You're the best! 💖"
+            ],
+            dance: [
+                "Let's dance together! 💃🎉",
+                "This is magical!",
+                "I'm spinning so fast!",
+                "Do you want to join?"
+            ],
+            feed: [
+                "Munch munch! Bamboo is delicious! 🎋",
+                "Thanks for the snack!",
+                "You take good care of me!",
+                "I'm so full and happy!"
+            ],
+            trick: [
+                "Watch me do a flip! 🤸",
+                "I can spin around! 🌪️",
+                "Tada! Did you like that?",
+                "I'm so talented! 😄"
+            ],
+            sleep: [
+                "I'm so tired... zzz",
+                "Sweet dreams await...",
+                "Good night, my friend... 😴",
+                "Thank you for a wonderful day!"
+            ]
+        };
+
+        function updatePandaMood(mood, moodText) {
+            pandaState.mood = mood;
+            document.getElementById('pandaMood').textContent = moodEmojis[mood] || "😊";
+            document.getElementById('pandaMoodText').textContent = moodText;
+        }
+
+        function setPandaAnimation(animation) {
+            const display = document.getElementById('pandaDisplay');
+            display.className = 'panda-display ' + animation;
+            setTimeout(() => {
+                display.className = 'panda-display';
+            }, 2000);
+        }
+
+        function sayPandaLine(category) {
+            const lines = pandaLines[category] || [];
+            const line = lines[Math.floor(Math.random() * lines.length)];
+            document.getElementById('pandaStatus').textContent = line;
+        }
+
+        function pandaPlay() {
+            if (pandaState.isPlaying) return;
+            
+            pandaState.isPlaying = true;
+            updatePandaMood('playful', 'Playful');
+            setPandaAnimation('spinning');
+            sayPandaLine('play');
+            
+            document.getElementById('gameArea').style.display = 'block';
+            startBambooGame();
+        }
+
+        function pandaPets() {
+            updatePandaMood('loved', 'Loved');
+            setPandaAnimation('waving');
+            sayPandaLine('pet');
+            pandaState.happiness = Math.min(100, pandaState.happiness + 20);
+        }
+
+        function pandaDance() {
+            updatePandaMood('dancing', 'Dancing');
+            setPandaAnimation('dancing');
+            sayPandaLine('dance');
+            pandaState.happiness = Math.min(100, pandaState.happiness + 15);
+        }
+
+        function pandaFeed() {
+            updatePandaMood('eating', 'Happy & Full');
+            setPandaAnimation('eating');
+            sayPandaLine('feed');
+            pandaState.energy = Math.min(100, pandaState.energy + 30);
+            pandaState.happiness = Math.min(100, pandaState.happiness + 10);
+        }
+
+        function pandaTrick() {
+            updatePandaMood('excited', 'Excited');
+            setPandaAnimation('jumping');
+            sayPandaLine('trick');
+            pandaState.happiness = Math.min(100, pandaState.happiness + 20);
+        }
+
+        function pandaSleep() {
+            updatePandaMood('sleeping', 'Resting');
+            setPandaAnimation('sleeping');
+            sayPandaLine('sleep');
+            pandaState.energy = 100;
+            pandaState.happiness = Math.min(100, pandaState.happiness + 5);
+        }
+
+        // Bamboo Game
+        function startBambooGame() {
+            const gameContainer = document.getElementById('gameContainer');
+            const bamboo = document.getElementById('bamboo');
+            pandaState.gameScore = 0;
+            
+            function moveBamboo() {
+                if (!pandaState.isPlaying) return;
+                
+                const containerRect = gameContainer.getBoundingClientRect();
+                const randomX = Math.random() * (containerRect.width - 60);
+                const randomY = Math.random() * (containerRect.height - 60);
+                
+                bamboo.style.left = (randomX + gameContainer.offsetLeft) + 'px';
+                bamboo.style.top = (randomY + gameContainer.offsetTop) + 'px';
+            }
+            
+            bamboo.onclick = function(e) {
+                e.stopPropagation();
+                pandaState.gameScore++;
+                document.getElementById('gameScore').textContent = 'Score: ' + pandaState.gameScore;
+                moveBamboo();
+                
+                // Panda reaction
+                const reactions = [
+                    { mood: 'excited', text: '🤩 Great catch!' },
+                    { mood: 'loved', text: '🥰 You got it!' },
+                    { mood: 'playful', text: '🤪 More more!' },
+                    { mood: 'happy', text: '😊 Nice one!' }
+                ];
+                const reaction = reactions[Math.floor(Math.random() * reactions.length)];
+                updatePandaMood(reaction.mood, reaction.text);
+            };
+            
+            moveBamboo();
+            const gameInterval = setInterval(() => {
+                if (!pandaState.isPlaying) {
+                    clearInterval(gameInterval);
+                } else {
+                    moveBamboo();
+                }
+            }, 2000);
+        }
+
+        function endGame() {
+            pandaState.isPlaying = false;
+            document.getElementById('gameArea').style.display = 'none';
+            updatePandaMood('happy', `Great game! Score: ${pandaState.gameScore}`);
+            sayPandaLine('play');
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            generateStars();
+            generateHearts();
+            
+            // Initial panda introduction
+            setTimeout(() => {
+                sayPandaLine('introduction');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
