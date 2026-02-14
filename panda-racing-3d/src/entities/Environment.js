@@ -4,19 +4,25 @@ export class Environment {
     constructor(scene) {
         this.scene = scene;
         this.trees = [];
-        this.treePool = [];
+        this.scenery = [];
         this.lastSpawnZ = 0;
-        this.spawnAhead = 300;
-        this.cleanBehind = 80;
+        this.spawnAhead = 500; // Furthest visibility
+        this.cleanBehind = 150;
+        this.roadWidth = 35;
+        this.mountainBoundary = 55;
 
         this.createGround();
-        this.createMountainsAndClouds();
+        this.createBackgroundMountains();
     }
 
     createGround() {
-        // Large green ground — NO BLACK TRACK
-        const geo = new THREE.PlaneGeometry(8000, 8000);
-        const mat = new THREE.MeshStandardMaterial({ color: 0x2d8a4e, roughness: 0.95 });
+        // Massive ground plane with repeat texture feeling
+        const geo = new THREE.PlaneGeometry(12000, 12000);
+        const mat = new THREE.MeshStandardMaterial({
+            color: 0x3d8c40, // More vibrant green
+            roughness: 0.9,
+            metalness: 0.1
+        });
         const ground = new THREE.Mesh(geo, mat);
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
@@ -24,119 +30,143 @@ export class Environment {
         this.ground = ground;
     }
 
-    createMountainsAndClouds() {
-        // Distant mountains (static, far away)
-        for (let i = 0; i < 30; i++) {
-            const h = 50 + Math.random() * 100;
-            const r = 30 + Math.random() * 50;
-            const geo = new THREE.ConeGeometry(r, h, 8);
-            const shade = 0x3a5a3a + Math.floor(Math.random() * 0x222222);
-            const mat = new THREE.MeshStandardMaterial({ color: shade, roughness: 0.9 });
+    createBackgroundMountains() {
+        // Static distant mountains
+        for (let i = 0; i < 40; i++) {
+            const h = 100 + Math.random() * 200;
+            const r = 80 + Math.random() * 120;
+            const geo = new THREE.ConeGeometry(r, h, 6);
+            const shade = 0x2d4d2d + Math.floor(Math.random() * 0x111111);
+            const mat = new THREE.MeshStandardMaterial({ color: shade });
             const mesh = new THREE.Mesh(geo, mat);
 
             const angle = Math.random() * Math.PI * 2;
-            const dist = 400 + Math.random() * 300;
-            mesh.position.set(Math.cos(angle) * dist, h / 2 - 15, Math.sin(angle) * dist - 500);
+            const dist = 1200 + Math.random() * 800;
+            mesh.position.set(Math.cos(angle) * dist, h * 0.4, Math.sin(angle) * dist - 800);
             this.scene.add(mesh);
-
-            // Snow caps
-            if (h > 80) {
-                const sg = new THREE.ConeGeometry(r * 0.25, h * 0.15, 8);
-                const sm = new THREE.MeshStandardMaterial({ color: 0xeeeeff });
-                const snow = new THREE.Mesh(sg, sm);
-                snow.position.copy(mesh.position);
-                snow.position.y += h * 0.42;
-                this.scene.add(snow);
-            }
-        }
-
-        // Clouds
-        const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65 });
-        for (let i = 0; i < 15; i++) {
-            const group = new THREE.Group();
-            for (let j = 0; j < 3 + Math.floor(Math.random() * 3); j++) {
-                const r = 6 + Math.random() * 10;
-                const puff = new THREE.Mesh(new THREE.SphereGeometry(r, 7, 7), cloudMat);
-                puff.position.set((Math.random() - 0.5) * 15, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 10);
-                group.add(puff);
-            }
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 200 + Math.random() * 400;
-            group.position.set(Math.cos(angle) * dist, 90 + Math.random() * 50, Math.sin(angle) * dist - 300);
-            this.scene.add(group);
         }
     }
 
     update(playerZ) {
-        // Move ground with player so it never ends
         if (this.ground) {
             this.ground.position.z = playerZ;
+            this.ground.position.x = this.getCurveX(playerZ);
         }
 
-        // Spawn trees ahead
+        // Spawn trees and forest elements ahead
         while (this.lastSpawnZ > playerZ - this.spawnAhead) {
-            this.spawnTreeRow(this.lastSpawnZ);
-            this.lastSpawnZ -= 15; // Every 15 units
+            this.spawnForestRow(this.lastSpawnZ);
+            this.lastSpawnZ -= 20;
         }
 
-        // Clean trees behind
+        // Clean up
+        this.cleanUp(playerZ);
+    }
+
+    cleanUp(playerZ) {
         for (let i = this.trees.length - 1; i >= 0; i--) {
             if (this.trees[i].position.z > playerZ + this.cleanBehind) {
                 this.scene.remove(this.trees[i]);
                 this.trees.splice(i, 1);
             }
         }
-    }
-
-    spawnTreeRow(z) {
-        // Trees on both sides of the "road" (road is ~ -14 to 14)
-        const count = 3 + Math.floor(Math.random() * 4);
-
-        for (let i = 0; i < count; i++) {
-            // Left side
-            const lx = -16 - Math.random() * 50;
-            this.createTree(lx, z + (Math.random() - 0.5) * 10);
-
-            // Right side
-            const rx = 16 + Math.random() * 50;
-            this.createTree(rx, z + (Math.random() - 0.5) * 10);
+        for (let i = this.scenery.length - 1; i >= 0; i--) {
+            if (this.scenery[i].position.z > playerZ + this.cleanBehind) {
+                this.scene.remove(this.scenery[i]);
+                this.scenery.splice(i, 1);
+            }
         }
     }
 
-    createTree(x, z) {
-        const group = new THREE.Group();
+    getCurveX(z) {
+        return Math.sin(z * 0.01) * 25 + Math.cos(z * 0.004) * 50;
+    }
 
-        const trunkH = 3 + Math.random() * 4;
-        const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, trunkH, 5);
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c3a1e });
+    spawnForestRow(z) {
+        const curveX = this.getCurveX(z);
+        const dist = Math.abs(z);
+        // Difficulty scaling formula: starts normal, grows denser over 10km
+        const densityMultiplier = 1 + Math.min(2, dist / 5000);
+
+        // 1. Road Trees (close to path)
+        const roadTreeCount = Math.floor((6 + Math.floor(Math.random() * 8)) * densityMultiplier);
+        for (let i = 0; i < roadTreeCount; i++) {
+            const side = Math.random() > 0.5 ? 1 : -1;
+            const x = curveX + side * (this.roadWidth * 0.5 + 5 + Math.random() * 30);
+            this.createTree(x, z + (Math.random() - 0.5) * 15);
+        }
+
+        // 2. Deep Forest Filler (filling the blank space)
+        const fillerCount = Math.floor((10 + Math.floor(Math.random() * 10)) * densityMultiplier);
+        for (let i = 0; i < fillerCount; i++) {
+            const x = curveX + (Math.random() - 0.5) * 1000;
+            if (Math.abs(x - curveX) > 60) {
+                this.createTree(x, z + (Math.random() - 0.5) * 20, true);
+            }
+        }
+
+        // 3. Grass/Boulders scenery
+        const sceneryCount = 15;
+        for (let i = 0; i < sceneryCount; i++) {
+            const x = curveX + (Math.random() - 0.5) * 200;
+            if (Math.abs(x - curveX) > 20) {
+                this.createScenery(x, z + (Math.random() - 0.5) * 20);
+            }
+        }
+    }
+
+    createTree(x, z, isFiller = false) {
+        const group = new THREE.Group();
+        const baseH = isFiller ? 15 + Math.random() * 20 : 8 + Math.random() * 10;
+
+        const trunkGeo = new THREE.CylinderGeometry(0.5, 0.8, baseH, 5);
+        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4d2d1e });
         const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-        trunk.position.y = trunkH / 2;
-        trunk.castShadow = true;
+        trunk.position.y = baseH * 0.5;
         group.add(trunk);
 
-        const leavesH = 5 + Math.random() * 4;
-        const leavesR = 2.5 + Math.random() * 2;
-        const green = 0x1a6b3a + Math.floor(Math.random() * 0x103010);
-        const leavesGeo = new THREE.ConeGeometry(leavesR, leavesH, 7);
-        const leavesMat = new THREE.MeshStandardMaterial({ color: green });
-        const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-        leaves.position.y = trunkH + leavesH / 2 - 1;
-        leaves.castShadow = true;
-        group.add(leaves);
+        const leavesMat = new THREE.MeshStandardMaterial({
+            color: 0x1a4a1a + Math.floor(Math.random() * 0x103010),
+            roughness: 0.8
+        });
 
-        // Second cone layer
-        const leaves2 = new THREE.Mesh(
-            new THREE.ConeGeometry(leavesR * 0.65, leavesH * 0.6, 7),
-            leavesMat
-        );
-        leaves2.position.y = trunkH + leavesH - 0.5;
-        group.add(leaves2);
+        for (let i = 0; i < 3; i++) {
+            const lyrH = baseH * (0.8 - i * 0.2);
+            const lyrR = (isFiller ? 5 : 3.5) * (1 - i * 0.2);
+            const lyr = new THREE.Mesh(new THREE.ConeGeometry(lyrR, lyrH, 6), leavesMat);
+            lyr.position.y = baseH * 0.6 + i * (lyrH * 0.3);
+            lyr.castShadow = !isFiller; // Shadows only for close trees for perf
+            group.add(lyr);
+        }
 
-        const s = 0.7 + Math.random() * 0.5;
-        group.scale.set(s, s, s);
         group.position.set(x, 0, z);
-
         this.scene.add(group);
         this.trees.push(group);
+    }
+
+    createScenery(x, z) {
+        const isRock = Math.random() > 0.7;
+        let mesh;
+        if (isRock) {
+            const s = 1 + Math.random() * 3;
+            mesh = new THREE.Mesh(
+                new THREE.DodecahedronGeometry(s, 0),
+                new THREE.MeshStandardMaterial({ color: 0x666666 })
+            );
+            mesh.position.y = s * 0.5;
+        } else {
+            // Grass tuft
+            const s = 0.5 + Math.random() * 1.5;
+            mesh = new THREE.Mesh(
+                new THREE.SphereGeometry(s, 5, 5),
+                new THREE.MeshStandardMaterial({ color: 0x3d8c40 })
+            );
+            mesh.scale.y = 0.2;
+            mesh.position.y = 0.1;
+        }
+        mesh.position.x = x;
+        mesh.position.z = z;
+        this.scene.add(mesh);
+        this.scenery.push(mesh);
     }
 }

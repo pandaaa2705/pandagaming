@@ -20,8 +20,10 @@ export class Obstacles {
             spawnInterval = 1.0; // Moderate
         } else if (distance < 3000) {
             spawnInterval = 0.6; // Dense
-        } else {
+        } else if (distance < 5000) {
             spawnInterval = 0.35; // Very dense
+        } else {
+            spawnInterval = 0.22; // EXTREME
         }
 
         // Spawn new obstacles ahead

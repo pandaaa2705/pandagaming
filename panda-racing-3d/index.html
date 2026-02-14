@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panda Racing 3D</title>
-    <meta name="description" content="3D Panda Racing Game - Race through forests, avoid obstacles, beat the computer!">
+    <title>Panda Racing 3D - Forest Life</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles/game.css">
     <script type="importmap">
         {
@@ -27,37 +26,121 @@
         <!-- Loading Screen -->
         <div id="loading-screen" class="screen">
             <div class="menu-content">
-                <h1 class="game-title">🐼 PANDA RACING 3D</h1>
+                <h1 class="game-title glow">PANDA RACING</h1>
+                <p class="subtitle">PREPARING FOREST ADVENTURE...</p>
                 <div class="loader-bar">
-                    <div class="loader-fill" id="loader-fill"></div>
+                    <div id="loader-fill" class="loader-fill"></div>
                 </div>
-                <p id="loading-text">Loading Engine...</p>
+                <p id="loading-text" class="controls-hint">Waking up the pandas...</p>
             </div>
         </div>
 
         <!-- Main Menu -->
         <div id="main-menu" class="screen hidden">
             <div class="menu-content">
-                <h1 class="game-title glow">🐼 PANDA RACING</h1>
-                <p class="subtitle">Forest Championship</p>
+                <h1 class="game-title glow">PANDA RACING</h1>
+                <p class="subtitle">FOREST LIFE & MOUNTAIN TRAILS</p>
                 <div class="menu-buttons">
-                    <button id="btn-play" class="btn btn-primary">🏁 PLAY (vs Computer)</button>
-                    <button id="btn-settings" class="btn btn-outline">⚙️ CONTROLS</button>
+                    <button id="btn-play" class="btn btn-primary">SINGLE PLAYER</button>
+                    <button id="btn-avatar" class="btn btn-secondary">SELECT AVATAR</button>
+                    <button id="btn-garage" class="btn btn-secondary">GARAGE / UPGRADES</button>
+                    <button id="btn-settings" class="btn btn-outline">CONTROLS</button>
                 </div>
-                <div class="controls-hint">
-                    <p>W/↑ Speed Up &nbsp; S/↓ Slow Down &nbsp; A/← Left &nbsp; D/→ Right</p>
-                    <p>SHIFT Nitro Boost &nbsp; ESC Pause</p>
+                <p class="controls-hint">Use WASD or Arrows to drive. SHIFT for Nitro.</p>
+            </div>
+        </div>
+
+        <!-- Avatar Selection -->
+        <div id="avatar-screen" class="screen hidden">
+            <div class="menu-content">
+                <h2 class="game-title">SELECT PANDA</h2>
+                <div class="selection-grid">
+                    <div class="selection-card active" data-id="panda_01">
+                        <div class="card-preview panda-p1"></div>
+                        <span>Panda Red</span>
+                    </div>
+                    <div class="selection-card" data-id="panda_02">
+                        <div class="card-preview panda-p2"></div>
+                        <span>Panda Blue</span>
+                    </div>
+                    <div class="selection-card" data-id="panda_03">
+                        <div class="card-preview panda-p3"></div>
+                        <span>Panda Green</span>
+                    </div>
                 </div>
+                <button id="btn-avatar-back" class="btn btn-outline">BACK</button>
+            </div>
+        </div>
+
+        <!-- Garage Screen -->
+        <div id="garage-screen" class="screen hidden">
+            <div class="menu-content">
+                <h2 class="game-title">GARAGE</h2>
+                <div id="garage-score" class="garage-score">Score: 0</div>
+
+                <div class="upgrade-container">
+                    <!-- Speed -->
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <span class="stat-name">TOP SPEED</span>
+                            <span id="stat-speed-level" class="stat-level">Lvl 1</span>
+                        </div>
+                        <div class="stat-bar-bg">
+                            <div id="stat-speed-fill" class="stat-fill" style="width: 10%"></div>
+                        </div>
+                        <button id="btn-upgrade-speed" class="btn btn-small">UPGRADE (500)</button>
+                    </div>
+
+                    <!-- Acceleration -->
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <span class="stat-name">ACCELERATION</span>
+                            <span id="stat-accel-level" class="stat-level">Lvl 1</span>
+                        </div>
+                        <div class="stat-bar-bg">
+                            <div id="stat-accel-fill" class="stat-fill" style="width: 10%"></div>
+                        </div>
+                        <button id="btn-upgrade-accel" class="btn btn-small">UPGRADE (500)</button>
+                    </div>
+
+                    <!-- Nitro -->
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <span class="stat-name">NITRO POWER</span>
+                            <span id="stat-nitro-level" class="stat-level">Lvl 1</span>
+                        </div>
+                        <div class="stat-bar-bg">
+                            <div id="stat-nitro-fill" class="stat-fill" style="width: 10%"></div>
+                        </div>
+                        <button id="btn-upgrade-nitro" class="btn btn-small">UPGRADE (500)</button>
+                    </div>
+
+                    <!-- Handling -->
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <span class="stat-name">HANDLING</span>
+                            <span id="stat-handling-level" class="stat-level">Lvl 1</span>
+                        </div>
+                        <div class="stat-bar-bg">
+                            <div id="stat-handling-fill" class="stat-fill" style="width: 10%"></div>
+                        </div>
+                        <button id="btn-upgrade-handling" class="btn btn-small">UPGRADE (500)</button>
+                    </div>
+                </div>
+
+                <button id="btn-garage-back" class="btn btn-outline">BACK TO MENU</button>
             </div>
         </div>
 
         <!-- HUD -->
         <div id="hud" class="hidden">
             <div class="hud-top-left">
+                <div id="status-display" class="hud-item status-running">STATUS: RACING</div>
                 <div id="distance-display" class="hud-item">DISTANCE: 0m</div>
                 <div id="score-display" class="hud-item">SCORE: 0</div>
-                <div id="status-display" class="hud-item status-running">STATUS: RACING</div>
+                <div id="animal-warning" class="hidden"></div>
             </div>
+
             <div class="hud-bottom-right">
                 <div id="speed-display" class="speed-display">0 KM/H</div>
                 <div class="nitro-container">
@@ -69,26 +152,27 @@
             </div>
         </div>
 
-        <!-- Elimination Overlay -->
-        <div id="elimination-overlay" class="screen hidden">
+        <!-- Elimination/Win Overlay -->
+        <div id="elimination-overlay" class="screen hidden" style="background: rgba(0,0,0,0.8);">
             <div class="menu-content">
-                <h1 class="game-title elimination-title" id="elimination-text">ELIMINATED</h1>
-                <p class="subtitle" id="elimination-stats">Distance: 0m | Score: 0</p>
+                <h1 id="elimination-text" class="elimination-title">ELIMINATED</h1>
+                <p id="elimination-stats" class="subtitle">Distance: 0m | Score: 0</p>
                 <div class="menu-buttons">
-                    <button id="btn-retry" class="btn btn-primary">🔄 PLAY AGAIN</button>
-                    <button id="btn-back-menu" class="btn btn-outline">🏠 MAIN MENU</button>
+                    <button id="btn-retry" class="btn btn-primary">TRY AGAIN</button>
+                    <button id="btn-next-level" class="btn btn-secondary hidden">NEXT LEVEL</button>
+                    <button id="btn-back-menu" class="btn btn-outline">MAIN MENU</button>
                 </div>
             </div>
         </div>
 
-        <!-- Pause -->
-        <div id="pause-menu" class="screen hidden">
+        <!-- Pause Menu -->
+        <div id="pause-menu" class="screen hidden" style="background: rgba(0,0,0,0.7);">
             <div class="menu-content">
-                <h2 class="game-title">⏸ PAUSED</h2>
+                <h1 class="game-title">PAUSED</h1>
                 <div class="menu-buttons">
-                    <button id="btn-resume" class="btn btn-primary">▶ RESUME</button>
-                    <button id="btn-restart" class="btn btn-secondary">🔄 RESTART</button>
-                    <button id="btn-quit" class="btn btn-outline">🏠 QUIT</button>
+                    <button id="btn-resume" class="btn btn-primary">RESUME</button>
+                    <button id="btn-restart" class="btn btn-secondary">RESTART</button>
+                    <button id="btn-quit" class="btn btn-outline">QUIT</button>
                 </div>
             </div>
         </div>
