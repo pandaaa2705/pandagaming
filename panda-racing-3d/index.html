@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panda Racing 3D</title>
+    <meta name="description" content="3D Panda Racing Game - Race through forests, avoid obstacles, beat the computer!">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/game.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="game-container"></div>
+
+    <div id="ui-layer">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="screen">
+            <div class="menu-content">
+                <h1 class="game-title">🐼 PANDA RACING 3D</h1>
+                <div class="loader-bar">
+                    <div class="loader-fill" id="loader-fill"></div>
+                </div>
+                <p id="loading-text">Loading Engine...</p>
+            </div>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="main-menu" class="screen hidden">
+            <div class="menu-content">
+                <h1 class="game-title glow">🐼 PANDA RACING</h1>
+                <p class="subtitle">Forest Championship</p>
+                <div class="menu-buttons">
+                    <button id="btn-play" class="btn btn-primary">🏁 PLAY (vs Computer)</button>
+                    <button id="btn-settings" class="btn btn-outline">⚙️ CONTROLS</button>
+                </div>
+                <div class="controls-hint">
+                    <p>W/↑ Speed Up &nbsp; S/↓ Slow Down &nbsp; A/← Left &nbsp; D/→ Right</p>
+                    <p>SHIFT Nitro Boost &nbsp; ESC Pause</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- HUD -->
+        <div id="hud" class="hidden">
+            <div class="hud-top-left">
+                <div id="distance-display" class="hud-item">DISTANCE: 0m</div>
+                <div id="score-display" class="hud-item">SCORE: 0</div>
+                <div id="status-display" class="hud-item status-running">STATUS: RACING</div>
+            </div>
+            <div class="hud-bottom-right">
+                <div id="speed-display" class="speed-display">0 KM/H</div>
+                <div class="nitro-container">
+                    <span class="nitro-label">NITRO</span>
+                    <div id="nitro-bar">
+                        <div id="nitro-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elimination Overlay -->
+        <div id="elimination-overlay" class="screen hidden">
+            <div class="menu-content">
+                <h1 class="game-title elimination-title" id="elimination-text">ELIMINATED</h1>
+                <p class="subtitle" id="elimination-stats">Distance: 0m | Score: 0</p>
+                <div class="menu-buttons">
+                    <button id="btn-retry" class="btn btn-primary">🔄 PLAY AGAIN</button>
+                    <button id="btn-back-menu" class="btn btn-outline">🏠 MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause -->
+        <div id="pause-menu" class="screen hidden">
+            <div class="menu-content">
+                <h2 class="game-title">⏸ PAUSED</h2>
+                <div class="menu-buttons">
+                    <button id="btn-resume" class="btn btn-primary">▶ RESUME</button>
+                    <button id="btn-restart" class="btn btn-secondary">🔄 RESTART</button>
+                    <button id="btn-quit" class="btn btn-outline">🏠 QUIT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
