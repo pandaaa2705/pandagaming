@@ -5,7 +5,8 @@ export class Animals {
         this.scene = scene;
         this.animals = [];
         this.spawnTimer = 0;
-        this.spawnInterval = 3; // Seconds between spawns
+        // Spawn more frequently
+        this.spawnInterval = 1.5; 
         this.animalTypes = ['rhino', 'lion', 'tiger', 'deer', 'dinosaur', 'horse', 'zebra', 'giraffe'];
     }
 
@@ -52,23 +53,23 @@ export class Animals {
         const type = this.animalTypes[Math.floor(Math.random() * this.animalTypes.length)];
         const group = this.createAnimalMesh(type);
         
-        // Spawn beside the road (not on it)
-        // Road is roughly at x = curveX, width ~35
-        const roadCurveX = 0; // Approximate - could get from environment
+        // Spawn beside the road - CLOSER to player for visibility
+        const roadCurveX = 0; 
         const side = Math.random() > 0.5 ? 1 : -1;
-        const distanceFromRoad = 25 + Math.random() * 30; // 25-55 units from road center
+        const distanceFromRoad = 15 + Math.random() * 20; // 15-35 units from road (closer)
         
         const spawnX = roadCurveX + side * distanceFromRoad;
-        const spawnZ = playerZ - 150 - Math.random() * 100;
+        const spawnZ = playerZ - 80 - Math.random() * 50; // 80-130 units ahead (closer)
         const baseY = this.getAnimalHeight(type);
 
         group.position.set(spawnX, baseY, spawnZ);
-        
-        // Face along the road (z direction)
         group.rotation.y = side > 0 ? Math.PI : 0;
         group.castShadow = true;
 
         this.scene.add(group);
+        
+        console.log(`Spawned ${type} at x:${spawnX.toFixed(1)}, z:${spawnZ.toFixed(1)}`);
+        
         this.animals.push({
             mesh: group,
             legs: group.userData.legs || [],
@@ -99,16 +100,16 @@ export class Animals {
         const bodyMat = new THREE.MeshStandardMaterial({ color, roughness: 0.7 });
         const darkMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
         
-        // Size multipliers
+        // Size multipliers - MADE LARGER for visibility
         const sizes = {
-            rhino: { body: [2.5, 1.8, 4], head: [1.2, 1.2, 1.5] },
-            lion: { body: [1.8, 1.4, 3], head: [1, 1, 1.2] },
-            tiger: { body: [1.8, 1.4, 3.2], head: [1, 1, 1.2] },
-            deer: { body: [1.2, 1.2, 2.2], head: [0.5, 0.6, 0.8] },
-            dinosaur: { body: [3, 2.5, 6], head: [1.5, 1.2, 2] },
-            horse: { body: [1.5, 1.6, 2.8], head: [0.6, 0.7, 1] },
-            zebra: { body: [1.5, 1.5, 2.6], head: [0.6, 0.7, 1] },
-            giraffe: { body: [1.8, 2, 3], head: [0.5, 1.2, 0.8] }
+            rhino: { body: [3.5, 2.5, 5.5], head: [1.8, 1.8, 2.2] },
+            lion: { body: [2.5, 2, 4], head: [1.4, 1.4, 1.8] },
+            tiger: { body: [2.5, 2, 4.5], head: [1.4, 1.4, 1.8] },
+            deer: { body: [1.8, 1.8, 3.5], head: [0.8, 0.9, 1.2] },
+            dinosaur: { body: [4, 3.5, 8], head: [2, 1.8, 3] },
+            horse: { body: [2.2, 2.2, 4], head: [0.9, 1, 1.5] },
+            zebra: { body: [2.2, 2.2, 3.8], head: [0.9, 1, 1.5] },
+            giraffe: { body: [2.5, 3, 4.5], head: [0.7, 1.8, 1.2] }
         };
         
         const size = sizes[type] || sizes.deer;
@@ -217,16 +218,16 @@ export class Animals {
 
     getAnimalHeight(type) {
         const heights = {
-            rhino: 1.5,
-            lion: 1.2,
-            tiger: 1.2,
-            deer: 1.0,
-            dinosaur: 2.0,
-            horse: 1.4,
-            zebra: 1.4,
-            giraffe: 3.5
+            rhino: 2.5,
+            lion: 1.8,
+            tiger: 1.8,
+            deer: 1.5,
+            dinosaur: 3.0,
+            horse: 2.0,
+            zebra: 2.0,
+            giraffe: 5.0
         };
-        return heights[type] || 1.0;
+        return heights[type] || 1.5;
     }
 
     getAnimalRadius(type) {
