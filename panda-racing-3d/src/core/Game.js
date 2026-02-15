@@ -133,10 +133,16 @@ export class Game {
         this.mouseControls = {
             enabled: true,
             isRotating: false,
+            isPanning: false,
             mouseX: 0,
             mouseY: 0,
             targetRotationX: 0,
-            targetRotationY: 0
+            targetRotationY: 0,
+            currentRotationX: 0,
+            currentRotationY: 0,
+            panX: 0,
+            panY: 0,
+            clickButton: null
         };
 
         // Mouse event listeners
@@ -147,11 +153,10 @@ export class Game {
         const canvas = this.renderer.domElement;
         
         canvas.addEventListener('mousedown', (event) => {
-            if (event.button === 0) { // Left click
-                this.mouseControls.isRotating = true;
-                this.mouseControls.mouseX = event.clientX;
-                this.mouseControls.mouseY = event.clientY;
-            }
+            this.mouseControls.isRotating = true;
+            this.mouseControls.mouseX = event.clientX;
+            this.mouseControls.mouseY = event.clientY;
+            this.mouseControls.clickButton = event.button;
         });
 
         canvas.addEventListener('mousemove', (event) => {
@@ -159,9 +164,18 @@ export class Game {
                 const deltaX = event.clientX - this.mouseControls.mouseX;
                 const deltaY = event.clientY - this.mouseControls.mouseY;
                 
-                // Update target rotation based on mouse movement
-                this.mouseControls.targetRotationY += deltaX * 0.005;
-                this.mouseControls.targetRotationX += deltaY * 0.005;
+                // Equal movement in X and Y (same scale)
+                const scale = 0.008;
+                
+                if (this.mouseControls.clickButton === 0) {
+                    // Left click - Rotate camera
+                    this.mouseControls.targetRotationY += deltaX * scale;
+                    this.mouseControls.targetRotationX += deltaY * scale;
+                } else if (this.mouseControls.clickButton === 2) {
+                    // Right click - Pan camera
+                    this.mouseControls.panX += deltaX * scale * 5;
+                    this.mouseControls.panY -= deltaY * scale * 5;
+                }
                 
                 this.mouseControls.mouseX = event.clientX;
                 this.mouseControls.mouseY = event.clientY;
@@ -170,10 +184,19 @@ export class Game {
 
         canvas.addEventListener('mouseup', () => {
             this.mouseControls.isRotating = false;
+            this.mouseControls.clickButton = null;
         });
 
         canvas.addEventListener('contextmenu', (event) => {
             event.preventDefault(); // Prevent right-click menu
+        });
+        
+        // Mouse wheel for zoom
+        canvas.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            const zoomSpeed = 0.5;
+            this.controlsSettings.cameraDistance += event.deltaY * zoomSpeed * 0.01;
+            this.controlsSettings.cameraDistance = Math.max(3, Math.min(30, this.controlsSettings.cameraDistance));
         });
     }
 
@@ -438,11 +461,17 @@ export class Game {
         // Camera smoothing factor based on settings
         const smoothingFactor = this.controlsSettings.cameraSmoothing / 100;
 
-        // Apply mouse rotation if enabled
+        // Smooth mouse rotation/panning with equal X and Y movement
         if (this.mouseControls.enabled) {
-            // Smooth mouse rotation
-            this.mouseControls.targetRotationX *= 0.95; // Damping
-            this.mouseControls.targetRotationY *= 0.95;
+            const damping = 0.92;
+            this.mouseControls.currentRotationX += (this.mouseControls.targetRotationX - this.mouseControls.currentRotationX) * 0.1;
+            this.mouseControls.currentRotationY += (this.mouseControls.targetRotationY - this.mouseControls.currentRotationY) * 0.1;
+            
+            // Apply damping to target
+            this.mouseControls.targetRotationX *= damping;
+            this.mouseControls.targetRotationY *= damping;
+            this.mouseControls.panX *= damping;
+            this.mouseControls.panY *= damping;
         }
 
         if (this.cameraMode === 'TPP') {
@@ -464,13 +493,14 @@ export class Game {
                 lookPos.set(p.x, p.y + 1.2, p.z - 20);
             }
 
-            // Apply mouse rotation to camera position
-            const mouseOffsetX = Math.sin(this.mouseControls.targetRotationY) * 10;
-            const mouseOffsetZ = -Math.cos(this.mouseControls.targetRotationY) * 10;
-            const mouseOffsetY = Math.sin(this.mouseControls.targetRotationX) * 5;
+            // Apply mouse rotation to camera position (equal X and Y scale)
+            const rotationScale = 8; // Same scale for both X and Y
+            const mouseOffsetX = Math.sin(this.mouseControls.currentRotationY) * rotationScale;
+            const mouseOffsetZ = -Math.cos(this.mouseControls.currentRotationY) * rotationScale;
+            const mouseOffsetY = Math.sin(this.mouseControls.currentRotationX) * rotationScale;
             
-            targetPos.x += mouseOffsetX;
-            targetPos.y += mouseOffsetY;
+            targetPos.x += mouseOffsetX + this.mouseControls.panX;
+            targetPos.y += mouseOffsetY + this.mouseControls.panY;
             targetPos.z += mouseOffsetZ;
 
             this.camera.position.lerp(targetPos, smoothingFactor);
@@ -480,9 +510,10 @@ export class Game {
             targetPos.set(p.x, p.y + 1.1, p.z - 0.5);
             lookPos.set(p.x, p.y + 0.8, p.z - 40);
 
-            // Apply mouse rotation to first person view
-            const mouseRotationX = this.mouseControls.targetRotationX * 0.3;
-            const mouseRotationY = this.mouseControls.targetRotationY * 0.5;
+            // Apply mouse rotation to first person view (equal scale)
+            const fovScale = 0.5;
+            const mouseRotationX = this.mouseControls.currentRotationX * fovScale;
+            const mouseRotationY = this.mouseControls.currentRotationY * fovScale;
             
             this.camera.rotation.x = mouseRotationX;
             this.camera.rotation.y = mouseRotationY;
