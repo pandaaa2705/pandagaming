@@ -1,20 +1,34 @@
 # Panda Racing 3D
 
-## How to Run
+**This repository contains ONLY the Panda 3D Racing game website.**
 
-Since this game uses modern 3D web technologies, it requires a local server to run (to load 3D models and scripts securely).
+## Quick Start
 
-1. Open your terminal (Command Prompt or PowerShell).
-2. Navigate to this directory:
-   ```sh
-   cd C:\Users\namra\.gemini\antigravity\scratch\pandagaming\panda-racing-3d
-   ```
-3. Run the following command (Python is installed):
-   ```sh
-   python -m http.server 8000
-   ```
-4. Open your browser and go to:
-   [http://localhost:8000](http://localhost:8000)
+```bash
+# Clone this repository
+git clone https://github.com/pandaaa2705/pandagaming.git
+
+# Navigate to project folder
+cd panda-racing-3d
+
+# Start local server
+python -m http.server 8000
+
+# Open in browser
+http://localhost:8000
+```
+
+## Project Structure
+
+- `index.html` - Main game page
+- `src/` - JavaScript game logic
+- `styles/` - CSS styling
+- `assets/` - Game assets (models, sounds)
+
+## This Repository Contains ONLY
+
+- Panda 3D Racing game
+- No other websites or projects
 
 ## How to Add Your Models
 
