@@ -23,9 +23,9 @@ export class Animals {
         for (let i = this.animals.length - 1; i >= 0; i--) {
             const animal = this.animals[i];
 
-            // Animals move beside the road (not crossing)
-            // They walk parallel to the road direction
-            animal.mesh.position.z += animal.speed * dt * 0.3; // Move forward slowly
+            // Animals walk TOWARD the camera (opposite to car direction)
+            // This makes them visible on the roadside as the car approaches
+            animal.mesh.position.z += animal.speed * dt * 0.5; // Walk toward +Z (toward camera)
             
             // Side-to-side idle movement
             animal.idleTime += dt;
@@ -53,13 +53,14 @@ export class Animals {
         const type = this.animalTypes[Math.floor(Math.random() * this.animalTypes.length)];
         const group = this.createAnimalMesh(type);
         
-        // Spawn beside the road - CLOSER to player for visibility
+        // Spawn beside the road - FURTHER ahead so animals are visible longer
         const roadCurveX = 0; 
         const side = Math.random() > 0.5 ? 1 : -1;
-        const distanceFromRoad = 15 + Math.random() * 20; // 15-35 units from road (closer)
+        const distanceFromRoad = 20 + Math.random() * 25; // 20-45 units from road
         
         const spawnX = roadCurveX + side * distanceFromRoad;
-        const spawnZ = playerZ - 80 - Math.random() * 50; // 80-130 units ahead (closer)
+        // Spawn FURTHER ahead (more negative Z) so animals walk toward camera longer
+        const spawnZ = playerZ - 200 - Math.random() * 150; // 200-350 units ahead
         const baseY = this.getAnimalHeight(type);
 
         group.position.set(spawnX, baseY, spawnZ);
