@@ -15,6 +15,9 @@ export class Game {
         this.input = new Input();
         this.saveData = SaveSystem.load();
 
+        // Load controls settings
+        this.controlsSettings = this.loadControlsSettings();
+
         this.assetLoader = new AssetLoader();
         this.soundSystem = null;
 
@@ -35,7 +38,7 @@ export class Game {
         this.finishLineSpawned = false;
 
         this.eliminationResult = ''; // '', 'player', 'computer', 'both'
-        this.cameraMode = 'TPP'; // 'TPP', 'FPP'
+        this.cameraMode = this.controlsSettings.cameraMode; // Use saved setting
         this.camTogglePressed = false;
     }
 
@@ -125,6 +128,53 @@ export class Game {
         });
 
         this.clock = new THREE.Clock();
+
+        // Mouse camera controls
+        this.mouseControls = {
+            enabled: true,
+            isRotating: false,
+            mouseX: 0,
+            mouseY: 0,
+            targetRotationX: 0,
+            targetRotationY: 0
+        };
+
+        // Mouse event listeners
+        this.setupMouseControls();
+    }
+
+    setupMouseControls() {
+        const canvas = this.renderer.domElement;
+        
+        canvas.addEventListener('mousedown', (event) => {
+            if (event.button === 0) { // Left click
+                this.mouseControls.isRotating = true;
+                this.mouseControls.mouseX = event.clientX;
+                this.mouseControls.mouseY = event.clientY;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (this.mouseControls.isRotating) {
+                const deltaX = event.clientX - this.mouseControls.mouseX;
+                const deltaY = event.clientY - this.mouseControls.mouseY;
+                
+                // Update target rotation based on mouse movement
+                this.mouseControls.targetRotationY += deltaX * 0.005;
+                this.mouseControls.targetRotationX += deltaY * 0.005;
+                
+                this.mouseControls.mouseX = event.clientX;
+                this.mouseControls.mouseY = event.clientY;
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            this.mouseControls.isRotating = false;
+        });
+
+        canvas.addEventListener('contextmenu', (event) => {
+            event.preventDefault(); // Prevent right-click menu
+        });
     }
 
     createWorld() {
@@ -133,7 +183,8 @@ export class Game {
 
         // Player car
         const playerStats = this.saveData.carStats[this.saveData.selectedCarId] || { speed: 1, accel: 1, nitro: 1, handling: 1 };
-        this.playerCar = new Car(this.scene, true, this.environment, playerStats, this.assetLoader);
+        const selectedCar = localStorage.getItem('selectedCar') || 'car_lamborghini';
+        this.playerCar = new Car(this.scene, true, this.environment, playerStats, this.assetLoader, selectedCar);
         this.cars.push(this.playerCar);
 
         // Computer car
@@ -384,19 +435,57 @@ export class Game {
         let targetPos = new THREE.Vector3();
         let lookPos = new THREE.Vector3();
 
-        if (this.cameraMode === 'TPP') {
-            // Third Person View
-            const offsetZ = 12 + speed * 0.15;
-            const offsetY = 4 + speed * 0.05;
-            targetPos.set(p.x * 0.5, offsetY, p.z + offsetZ);
-            lookPos.set(p.x, p.y + 1.2, p.z - 20);
+        // Camera smoothing factor based on settings
+        const smoothingFactor = this.controlsSettings.cameraSmoothing / 100;
 
-            this.camera.position.lerp(targetPos, 0.12);
+        // Apply mouse rotation if enabled
+        if (this.mouseControls.enabled) {
+            // Smooth mouse rotation
+            this.mouseControls.targetRotationX *= 0.95; // Damping
+            this.mouseControls.targetRotationY *= 0.95;
+        }
+
+        if (this.cameraMode === 'TPP') {
+            // Third Person View with customizable settings
+            const distance = this.controlsSettings.cameraDistance;
+            const height = this.controlsSettings.cameraHeight;
+            
+            // Dynamic offset based on speed and settings
+            const offsetZ = distance + speed * 0.15;
+            const offsetY = height + speed * 0.05;
+            
+            if (this.controlsSettings.cameraMode === 'close') {
+                // Close follow view
+                targetPos.set(p.x * 0.3, offsetY * 0.7, p.z + offsetZ * 0.7);
+                lookPos.set(p.x, p.y + 0.8, p.z - 15);
+            } else {
+                // Default outside view
+                targetPos.set(p.x * 0.5, offsetY, p.z + offsetZ);
+                lookPos.set(p.x, p.y + 1.2, p.z - 20);
+            }
+
+            // Apply mouse rotation to camera position
+            const mouseOffsetX = Math.sin(this.mouseControls.targetRotationY) * 10;
+            const mouseOffsetZ = -Math.cos(this.mouseControls.targetRotationY) * 10;
+            const mouseOffsetY = Math.sin(this.mouseControls.targetRotationX) * 5;
+            
+            targetPos.x += mouseOffsetX;
+            targetPos.y += mouseOffsetY;
+            targetPos.z += mouseOffsetZ;
+
+            this.camera.position.lerp(targetPos, smoothingFactor);
             this.camera.lookAt(lookPos);
         } else {
             // First Person View (In driver seat)
             targetPos.set(p.x, p.y + 1.1, p.z - 0.5);
             lookPos.set(p.x, p.y + 0.8, p.z - 40);
+
+            // Apply mouse rotation to first person view
+            const mouseRotationX = this.mouseControls.targetRotationX * 0.3;
+            const mouseRotationY = this.mouseControls.targetRotationY * 0.5;
+            
+            this.camera.rotation.x = mouseRotationX;
+            this.camera.rotation.y = mouseRotationY;
 
             // Fast jump to FPP, slow lerp back to TPP
             this.camera.position.lerp(targetPos, 0.4);
@@ -443,6 +532,43 @@ export class Game {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Controls Settings Methods
+    loadControlsSettings() {
+        const controls = localStorage.getItem('pandaRacingControls');
+        const defaultControls = {
+            cameraMode: 'outside',
+            cameraDistance: 10,
+            cameraHeight: 8,
+            steeringSensitivity: 5,
+            cameraSmoothing: 7
+        };
+        return controls ? JSON.parse(controls) : defaultControls;
+    }
+
+    setCameraMode(mode) {
+        this.controlsSettings.cameraMode = mode;
+        this.cameraMode = mode === 'inside' ? 'FPP' : 'TPP';
+    }
+
+    setCameraDistance(distance) {
+        this.controlsSettings.cameraDistance = distance;
+    }
+
+    setCameraHeight(height) {
+        this.controlsSettings.cameraHeight = height;
+    }
+
+    setSteeringSensitivity(sensitivity) {
+        this.controlsSettings.steeringSensitivity = sensitivity;
+        if (this.playerCar && this.playerCar.setSteeringSensitivity) {
+            this.playerCar.setSteeringSensitivity(sensitivity);
+        }
+    }
+
+    setCameraSmoothing(smoothing) {
+        this.controlsSettings.cameraSmoothing = smoothing;
     }
 
     destroy() {

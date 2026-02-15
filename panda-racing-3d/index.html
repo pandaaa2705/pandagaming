@@ -43,6 +43,7 @@
                 <div class="menu-buttons">
                     <button id="btn-play" class="btn btn-primary">SINGLE PLAYER</button>
                     <button id="btn-avatar" class="btn btn-secondary">SELECT AVATAR</button>
+                    <button id="btn-car" class="btn btn-secondary">SELECT CAR</button>
                     <button id="btn-garage" class="btn btn-secondary">GARAGE / UPGRADES</button>
                     <button id="btn-settings" class="btn btn-outline">CONTROLS</button>
                 </div>
@@ -53,22 +54,76 @@
         <!-- Avatar Selection -->
         <div id="avatar-screen" class="screen hidden">
             <div class="menu-content">
-                <h2 class="game-title">SELECT PANDA</h2>
-                <div class="selection-grid">
-                    <div class="selection-card active" data-id="panda_01">
-                        <div class="card-preview panda-p1"></div>
-                        <span>Panda Red</span>
-                    </div>
-                    <div class="selection-card" data-id="panda_02">
-                        <div class="card-preview panda-p2"></div>
-                        <span>Panda Blue</span>
-                    </div>
-                    <div class="selection-card" data-id="panda_03">
-                        <div class="card-preview panda-p3"></div>
-                        <span>Panda Green</span>
+                <h2 class="game-title">SELECT YOUR DRIVER</h2>
+                <div class="preview-container">
+                    <div id="avatar-preview-3d" class="preview-3d"></div>
+                    <div class="selection-grid">
+                        <div class="selection-card active" data-id="panda_classic">
+                            <div class="card-preview avatar-classic"></div>
+                            <span>Classic Panda</span>
+                            <small>Original racing panda</small>
+                        </div>
+                        <div class="selection-card" data-id="panda_sport">
+                            <div class="card-preview avatar-sport"></div>
+                            <span>Sport Panda</span>
+                            <small>Fast & agile</small>
+                        </div>
+                        <div class="selection-card" data-id="panda_pro">
+                            <div class="card-preview avatar-pro"></div>
+                            <span>Pro Panda</span>
+                            <small>Professional racer</small>
+                        </div>
+                        <div class="selection-card" data-id="panda_ninja">
+                            <div class="card-preview avatar-ninja"></div>
+                            <span>Ninja Panda</span>
+                            <small>Stealth & speed</small>
+                        </div>
+                        <div class="selection-card" data-id="panda_mystic">
+                            <div class="card-preview avatar-mystic"></div>
+                            <span>Mystic Panda</span>
+                            <small>Magic powers</small>
+                        </div>
                     </div>
                 </div>
                 <button id="btn-avatar-back" class="btn btn-outline">BACK</button>
+            </div>
+        </div>
+
+        <!-- Car Selection -->
+        <div id="car-screen" class="screen hidden">
+            <div class="menu-content">
+                <h2 class="game-title">SELECT YOUR RIDE</h2>
+                <div class="preview-container">
+                    <div id="car-preview-3d" class="preview-3d"></div>
+                    <div class="selection-grid">
+                        <div class="selection-card active" data-id="car_lamborghini">
+                            <div class="card-preview car-lamborghini"></div>
+                            <span>Lamborghini</span>
+                            <small>Navy Blue Speed</small>
+                        </div>
+                        <div class="selection-card" data-id="car_bugatti">
+                            <div class="card-preview car-bugatti"></div>
+                            <span>Bugatti</span>
+                            <small>Black Excellence</small>
+                        </div>
+                        <div class="selection-card" data-id="car_supra">
+                            <div class="card-preview car-supra"></div>
+                            <span>Supra</span>
+                            <small>Pink Power</small>
+                        </div>
+                        <div class="selection-card" data-id="car_porsche">
+                            <div class="card-preview car-porsche"></div>
+                            <span>Porsche</span>
+                            <small>White Luxury</small>
+                        </div>
+                        <div class="selection-card" data-id="car_ferrari">
+                            <div class="card-preview car-ferrari"></div>
+                            <span>Ferrari</span>
+                            <small>Red Passion</small>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-car-back" class="btn btn-outline">BACK</button>
             </div>
         </div>
 
@@ -132,6 +187,105 @@
             </div>
         </div>
 
+        <!-- Controls Screen -->
+        <div id="controls-screen" class="screen hidden">
+            <div class="menu-content">
+                <h2 class="game-title">CONTROLS & SETTINGS</h2>
+                
+                <div class="controls-container">
+                    <!-- Camera Settings -->
+                    <div class="control-section">
+                        <h3 class="section-title">CAMERA SETTINGS</h3>
+                        <div class="control-group">
+                            <label class="control-label">Camera View</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="camera-mode" value="outside" checked>
+                                    <span class="radio-label">Outside Car (Default)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="camera-mode" value="inside">
+                                    <span class="radio-label">Inside Car View</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="camera-mode" value="close">
+                                    <span class="radio-label">Close Follow View</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Camera Distance</label>
+                            <input type="range" id="camera-distance" min="5" max="20" value="10" class="slider">
+                            <span id="camera-distance-value" class="slider-value">10</span>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Camera Height</label>
+                            <input type="range" id="camera-height" min="2" max="15" value="8" class="slider">
+                            <span id="camera-height-value" class="slider-value">8</span>
+                        </div>
+                    </div>
+
+                    <!-- Sensitivity Settings -->
+                    <div class="control-section">
+                        <h3 class="section-title">SENSITIVITY</h3>
+                        <div class="control-group">
+                            <label class="control-label">Steering Sensitivity</label>
+                            <input type="range" id="steering-sensitivity" min="1" max="10" value="5" class="slider">
+                            <span id="steering-sensitivity-value" class="slider-value">5</span>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Camera Smoothing</label>
+                            <input type="range" id="camera-smoothing" min="1" max="10" value="7" class="slider">
+                            <span id="camera-smoothing-value" class="slider-value">7</span>
+                        </div>
+                    </div>
+
+                    <!-- Control Scheme -->
+                    <div class="control-section">
+                        <h3 class="section-title">CONTROL SCHEME</h3>
+                        <div class="control-keys">
+                            <div class="key-row">
+                                <span class="key-label">Move Forward:</span>
+                                <span class="key-binding">W / ↑</span>
+                            </div>
+                            <div class="key-row">
+                                <span class="key-label">Move Backward:</span>
+                                <span class="key-binding">S / ↓</span>
+                            </div>
+                            <div class="key-row">
+                                <span class="key-label">Turn Left:</span>
+                                <span class="key-binding">A / ←</span>
+                            </div>
+                            <div class="key-row">
+                                <span class="key-label">Turn Right:</span>
+                                <span class="key-binding">D / →</span>
+                            </div>
+                            <div class="key-row">
+                                <span class="key-label">Nitro Boost:</span>
+                                <span class="key-binding">SHIFT</span>
+                            </div>
+                            <div class="key-row">
+                                <span class="key-label">Toggle Camera:</span>
+                                <span class="key-binding">C</span>
+                            </div>
+                            <div class="key-row">
+                                <span class="key-label">Pause Game:</span>
+                                <span class="key-binding">ESC / P</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-buttons">
+                    <button id="btn-controls-back" class="btn btn-outline">BACK TO MENU</button>
+                    <button id="btn-reset-controls" class="btn btn-secondary">RESET TO DEFAULT</button>
+                </div>
+            </div>
+        </div>
+
         <!-- HUD -->
         <div id="hud" class="hidden">
             <div class="hud-top-left">
@@ -139,6 +293,7 @@
                 <div id="distance-display" class="hud-item">DISTANCE: 0m</div>
                 <div id="score-display" class="hud-item">SCORE: 0</div>
                 <div id="animal-warning" class="hidden"></div>
+                <button id="btn-ingame-controls" class="hud-controls-btn">⚙️</button>
             </div>
 
             <div class="hud-bottom-right">

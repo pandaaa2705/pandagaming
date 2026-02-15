@@ -16,13 +16,71 @@ export class Environment {
     }
 
     createGround() {
-        // Massive ground plane with repeat texture feeling
+        // Massive ground plane with mixed sand and grass texture
         const geo = new THREE.PlaneGeometry(12000, 12000);
+        
+        // Create mixed texture
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        
+        // Sand base
+        ctx.fillStyle = '#c2b280';
+        ctx.fillRect(0, 0, 512, 512);
+        
+        // Add grass patches
+        for (let i = 0; i < 150; i++) {
+            const x = Math.random() * 512;
+            const y = Math.random() * 512;
+            const radius = Math.random() * 40 + 20;
+            
+            const gradient = ctx.createRadialGradient(x, y, 0, radius, x, y, radius);
+            gradient.addColorStop(0, 'rgba(34, 139, 34, 0.8)'); // Forest green
+            gradient.addColorStop(0.5, 'rgba(46, 125, 50, 0.6)'); // Medium green
+            gradient.addColorStop(1, 'rgba(34, 139, 34, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        }
+        
+        // Add sand texture variations
+        for (let i = 0; i < 200; i++) {
+            const x = Math.random() * 512;
+            const y = Math.random() * 512;
+            const size = Math.random() * 3 + 1;
+            const opacity = Math.random() * 0.3 + 0.1;
+            
+            ctx.fillStyle = `rgba(194, 178, 128, ${opacity})`;
+            ctx.fillRect(x, y, size, size);
+        }
+        
+        // Add darker sand patches
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * 512;
+            const y = Math.random() * 512;
+            const radius = Math.random() * 20 + 10;
+            
+            const gradient = ctx.createRadialGradient(x, y, 0, radius, x, y, radius);
+            gradient.addColorStop(0, 'rgba(161, 136, 90, 0.3)');
+            gradient.addColorStop(1, 'rgba(161, 136, 90, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        }
+        
+        const mixedTexture = new THREE.CanvasTexture(canvas);
+        mixedTexture.wrapS = THREE.RepeatWrapping;
+        mixedTexture.wrapT = THREE.RepeatWrapping;
+        mixedTexture.repeat.set(50, 50);
+        
         const mat = new THREE.MeshStandardMaterial({
-            color: 0x3d8c40, // More vibrant green
+            map: mixedTexture,
+            color: 0xc2b280,
             roughness: 0.9,
             metalness: 0.1
         });
+        
         const ground = new THREE.Mesh(geo, mat);
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
@@ -79,7 +137,12 @@ export class Environment {
     }
 
     getCurveX(z) {
-        return Math.sin(z * 0.01) * 25 + Math.cos(z * 0.004) * 50;
+        // More dramatic curves combining sine waves for realistic racing turns
+        const baseCurve = Math.sin(z * 0.008) * 40; // Main S-curve
+        const secondaryCurve = Math.cos(z * 0.015) * 25; // Secondary curves
+        const microTurns = Math.sin(z * 0.05) * 8; // Small quick turns
+        
+        return baseCurve + secondaryCurve + microTurns;
     }
 
     spawnForestRow(z) {
