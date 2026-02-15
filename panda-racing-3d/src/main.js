@@ -244,519 +244,542 @@ window.addEventListener('DOMContentLoaded', () => {
         // Clear existing preview
         previewContainer.innerHTML = '';
         
-        // Create 3D scene for each car type with unique design
-        const previewScene = new THREE.Scene();
-        const previewCamera = new THREE.PerspectiveCamera(45, 300/200, 0.1, 100);
-        const previewRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        previewRenderer.setSize(300, 200);
-        previewRenderer.setClearColor(0x000000, 0);
-        previewContainer.appendChild(previewRenderer.domElement);
+        // Create canvas for 2D car drawing
+        const canvas = document.createElement('canvas');
+        canvas.width = 320;
+        canvas.height = 200;
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        const ctx = canvas.getContext('2d');
         
-        // Add lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-        previewScene.add(ambientLight);
+        // Set background
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, 200);
+        bgGradient.addColorStop(0, '#1a1a2e');
+        bgGradient.addColorStop(1, '#0a0a1a');
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, 320, 200);
         
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(5, 10, 7);
-        previewScene.add(dirLight);
+        // Draw car based on type
+        drawRealisticCar(ctx, carType, 0); // 0 rotation initially
         
-        const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
-        backLight.position.set(-5, 5, -10);
-        previewScene.add(backLight);
+        previewContainer.appendChild(canvas);
         
-        // Create unique 3D car model based on type
-        const carGroup = createUniqueCarModel(carType);
-        previewScene.add(carGroup);
-        
-        // Position camera based on car type for best view
-        previewCamera.position.set(0, 2, 8);
-        previewCamera.lookAt(0, 0.5, 0);
-        
-        // Animation loop with 360 rotation
-        let rotationSpeed = 0.01;
-        function animateCar() {
-            requestAnimationFrame(animateCar);
-            carGroup.rotation.y += rotationSpeed;
-            previewRenderer.render(previewScene, previewCamera);
+        // Animate rotation
+        let rotation = 0;
+        function animate() {
+            rotation += 0.02;
+            
+            // Clear and redraw
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, 320, 200);
+            
+            // Draw car with rotation
+            drawRealisticCar(ctx, carType, rotation);
+            
+            requestAnimationFrame(animate);
         }
-        animateCar();
+        animate();
         
-        console.log('3D car preview created for:', carType);
+        console.log('Canvas car preview created for:', carType);
     }
     
-    function createUniqueCarModel(carType) {
-        const carGroup = new THREE.Group();
+    // Draw realistic car silhouette
+    function drawRealisticCar(ctx, carType, rotation) {
+        const centerX = 160;
+        const centerY = 120;
+        const scale = 0.8 + Math.cos(rotation) * 0.1; // Subtle breathing effect
         
+        // Car colors
+        let bodyColor, darkColor, windowColor;
         switch(carType) {
             case 'car_lamborghini':
-                createLamborghiniModel(carGroup);
+                bodyColor = '#0047ab';
+                darkColor = '#002855';
+                windowColor = '#0a0a1a';
                 break;
             case 'car_bugatti':
-                createBugattiModel(carGroup);
+                bodyColor = '#1a1a1a';
+                darkColor = '#000000';
+                windowColor = '#050505';
                 break;
             case 'car_supra':
-                createSupraModel(carGroup);
+                bodyColor = '#ff1493';
+                darkColor = '#cc1077';
+                windowColor = '#0a0a0a';
                 break;
             case 'car_porsche':
-                createPorscheModel(carGroup);
+                bodyColor = '#f5f5f5';
+                darkColor = '#e0e0e0';
+                windowColor = '#111111';
                 break;
             case 'car_ferrari':
-                createFerrariModel(carGroup);
+                bodyColor = '#ff0000';
+                darkColor = '#cc0000';
+                windowColor = '#0a0a0a';
                 break;
             default:
-                createLamborghiniModel(carGroup);
+                bodyColor = '#0047ab';
+                darkColor = '#002855';
+                windowColor = '#0a0a1a';
         }
         
-        return carGroup;
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.scale(scale, scale);
+        
+        // Add lighting effect
+        const lightX = Math.sin(rotation) * 30;
+        
+        // Draw shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.beginPath();
+        ctx.ellipse(0, 55, 100, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        if (carType === 'car_lamborghini') {
+            drawLamborghini2D(ctx, bodyColor, darkColor, windowColor, lightX);
+        } else if (carType === 'car_bugatti') {
+            drawBugatti2D(ctx, bodyColor, darkColor, windowColor, lightX);
+        } else if (carType === 'car_supra') {
+            drawSupra2D(ctx, bodyColor, darkColor, windowColor, lightX);
+        } else if (carType === 'car_porsche') {
+            drawPorsche2D(ctx, bodyColor, darkColor, windowColor, lightX);
+        } else if (carType === 'car_ferrari') {
+            drawFerrari2D(ctx, bodyColor, darkColor, windowColor, lightX);
+        }
+        
+        ctx.restore();
     }
     
     // LAMBORGHINI - Sharp angular supercar
-    function createLamborghiniModel(group) {
-        const bodyMat = new THREE.MeshPhongMaterial({ color: 0x0047ab, shininess: 100, metalness: 0.6 });
-        const glassMat = new THREE.MeshPhongMaterial({ color: 0x111111, shininess: 90 });
+    function drawLamborghini2D(ctx, bodyColor, darkColor, windowColor, lightX) {
+        // Body gradient for metallic effect
+        const bodyGrad = ctx.createLinearGradient(-60, -20, 60, 30);
+        bodyGrad.addColorStop(0, darkColor);
+        bodyGrad.addColorStop(0.3, bodyColor);
+        bodyGrad.addColorStop(0.7, bodyColor);
+        bodyGrad.addColorStop(1, darkColor);
         
-        // Lower body - main chassis
-        const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.8, 6), bodyMat);
-        lowerBody.position.y = 0.6;
-        group.add(lowerBody);
-        
-        // Upper body - cabin area
-        const upperBody = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.6, 3), bodyMat);
-        upperBody.position.set(0, 1.3, -0.5);
-        group.add(upperBody);
-        
-        // Front hood
-        const hood = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.3, 2), bodyMat);
-        hood.position.set(0, 1.15, 1.8);
-        hood.rotation.x = -0.1;
-        group.add(hood);
-        
-        // Rear deck
-        const rear = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.4, 2), bodyMat);
-        rear.position.set(0, 1.2, -2.5);
-        group.add(rear);
-        
-        // Windshield
-        const windshield = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.8), glassMat);
-        windshield.position.set(0, 1.5, 0.8);
-        windshield.rotation.x = -Math.PI / 4;
-        group.add(windshield);
-        
-        // Side windows
-        const sideWindowGeo = new THREE.PlaneGeometry(1.5, 0.6);
-        const leftWindow = new THREE.Mesh(sideWindowGeo, glassMat);
-        leftWindow.position.set(-1.41, 1.4, -0.5);
-        leftWindow.rotation.y = -Math.PI / 2;
-        group.add(leftWindow);
-        
-        const rightWindow = new THREE.Mesh(sideWindowGeo, glassMat);
-        rightWindow.position.set(1.41, 1.4, -0.5);
-        rightWindow.rotation.y = Math.PI / 2;
-        group.add(rightWindow);
-        
-        // Scissor doors (Lamborghini signature)
-        const doorGeo = new THREE.BoxGeometry(0.1, 1, 2);
-        const leftDoor = new THREE.Mesh(doorGeo, bodyMat);
-        leftDoor.position.set(-1.8, 1.2, -0.3);
-        leftDoor.rotation.z = Math.PI / 8;
-        group.add(leftDoor);
-        
-        const rightDoor = new THREE.Mesh(doorGeo, bodyMat);
-        rightDoor.position.set(1.8, 1.2, -0.3);
-        rightDoor.rotation.z = -Math.PI / 8;
-        group.add(rightDoor);
-        
-        // Rear spoiler
-        const spoiler = new THREE.Mesh(new THREE.BoxGeometry(3, 0.15, 0.8), bodyMat);
-        spoiler.position.set(0, 1.7, -3);
-        group.add(spoiler);
-        
-        // Spoiler supports
-        const supportGeo = new THREE.BoxGeometry(0.1, 0.3, 0.1);
-        const leftSupport = new THREE.Mesh(supportGeo, bodyMat);
-        leftSupport.position.set(-1, 1.55, -3);
-        group.add(leftSupport);
-        const rightSupport = new THREE.Mesh(supportGeo, bodyMat);
-        rightSupport.position.set(1, 1.55, -3);
-        group.add(rightSupport);
-        
-        // Wheels
-        addRealisticWheels(group, 1.6, 1.8);
-        
-        // Angular headlights
-        addCarHeadlights(group, 'angular');
-        
-        // Taillights
-        addCarTaillights(group);
-    }
-    
-    // BUGATTI - Elegant luxury hypercar
-    function createBugattiModel(group) {
-        const bodyMat = new THREE.MeshPhongMaterial({ color: 0x1a1a1a, shininess: 120, metalness: 0.5 });
-        const chromeMat = new THREE.MeshPhongMaterial({ color: 0xaaaaaa, shininess: 150 });
-        const glassMat = new THREE.MeshPhongMaterial({ color: 0x111111, shininess: 90 });
-        
-        // Main body - longer and elegant
-        const body = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.9, 6.5), bodyMat);
-        body.position.y = 0.65;
-        group.add(body);
-        
-        // Cabin - bubble shape
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(3, 0.7, 2.5), bodyMat);
-        cabin.position.set(0, 1.45, -0.5);
-        group.add(cabin);
-        
-        // Rounded front
-        const front = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.9, 0.5, 16, 1, false, 0, Math.PI), bodyMat);
-        front.rotation.z = Math.PI / 2;
-        front.position.set(0, 0.65, 3.25);
-        group.add(front);
-        
-        // Windshield - curved
-        const windshield = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.7), glassMat);
-        windshield.position.set(0, 1.6, 0.6);
-        windshield.rotation.x = -Math.PI / 5;
-        group.add(windshield);
-        
-        // Side windows
-        const sideWinGeo = new THREE.PlaneGeometry(2, 0.5);
-        const leftWin = new THREE.Mesh(sideWinGeo, glassMat);
-        leftWin.position.set(-1.51, 1.5, -0.5);
-        leftWin.rotation.y = -Math.PI / 2;
-        group.add(leftWin);
-        
-        const rightWin = new THREE.Mesh(sideWinGeo, glassMat);
-        rightWin.position.set(1.51, 1.5, -0.5);
-        rightWin.rotation.y = Math.PI / 2;
-        group.add(rightWin);
-        
-        // Horse collar grille
-        const grille = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.15, 16), chromeMat);
-        grille.rotation.x = Math.PI / 2;
-        grille.position.set(0, 0.7, 3.35);
-        group.add(grille);
-        
-        // Chrome side accents
-        const chromeSideGeo = new THREE.BoxGeometry(0.05, 0.1, 5);
-        const leftChrome = new THREE.Mesh(chromeSideGeo, chromeMat);
-        leftChrome.position.set(-1.91, 0.7, 0);
-        group.add(leftChrome);
-        
-        const rightChrome = new THREE.Mesh(chromeSideGeo, chromeMat);
-        rightChrome.position.set(1.91, 0.7, 0);
-        group.add(rightChrome);
-        
-        // Wheels
-        addRealisticWheels(group, 1.7, 2);
-        
-        // Round headlights
-        addCarHeadlights(group, 'round');
-        addCarTaillights(group);
-    }
-    
-    // SUPRA - Japanese sports car
-    function createSupraModel(group) {
-        const bodyMat = new THREE.MeshPhongMaterial({ color: 0xff1493, shininess: 80 });
-        const darkMat = new THREE.MeshPhongMaterial({ color: 0xcc1077 });
-        const glassMat = new THREE.MeshPhongMaterial({ color: 0x111111, shininess: 90 });
-        const stripeMat = new THREE.MeshPhongMaterial({ color: 0xffffff });
-        
-        // Main body
-        const body = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.85, 5.5), bodyMat);
-        body.position.y = 0.625;
-        group.add(body);
-        
-        // Cabin
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.6, 2.2), darkMat);
-        cabin.position.set(0, 1.35, -0.3);
-        group.add(cabin);
-        
-        // Hood
-        const hood = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.25, 1.8), bodyMat);
-        hood.position.set(0, 1.125, 1.5);
-        group.add(hood);
-        
-        // Trunk
-        const trunk = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.3, 1.5), bodyMat);
-        trunk.position.set(0, 1.15, -2);
-        group.add(trunk);
-        
-        // Windshield
-        const windshield = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.7), glassMat);
-        windshield.position.set(0, 1.55, 0.7);
-        windshield.rotation.x = -Math.PI / 4;
-        group.add(windshield);
-        
-        // Side windows
-        const sideWinGeo = new THREE.PlaneGeometry(1.8, 0.5);
-        const leftWin = new THREE.Mesh(sideWinGeo, glassMat);
-        leftWin.position.set(-1.31, 1.45, -0.3);
-        leftWin.rotation.y = -Math.PI / 2;
-        group.add(leftWin);
-        
-        const rightWin = new THREE.Mesh(sideWinGeo, glassMat);
-        rightWin.position.set(1.31, 1.45, -0.3);
-        rightWin.rotation.y = Math.PI / 2;
-        group.add(rightWin);
-        
-        // Big rear spoiler
-        const spoiler = new THREE.Mesh(new THREE.BoxGeometry(3, 0.12, 0.6), darkMat);
-        spoiler.position.set(0, 1.65, -2.5);
-        group.add(spoiler);
-        
-        // Spoiler legs
-        const legGeo = new THREE.BoxGeometry(0.08, 0.3, 0.15);
-        const leftLeg = new THREE.Mesh(legGeo, darkMat);
-        leftLeg.position.set(-0.8, 1.45, -2.5);
-        group.add(leftLeg);
-        const rightLeg = new THREE.Mesh(legGeo, darkMat);
-        rightLeg.position.set(0.8, 1.45, -2.5);
-        group.add(rightLeg);
-        
-        // Racing stripe on hood
-        const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.02, 1.6), stripeMat);
-        stripe.position.set(0, 1.26, 1.5);
-        group.add(stripe);
-        
-        // Stripe on trunk
-        const trunkStripe = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.02, 1.4), stripeMat);
-        trunkStripe.position.set(0, 1.31, -2);
-        group.add(trunkStripe);
-        
-        // Wheels
-        addRealisticWheels(group, 1.5, 1.7);
-        
-        // Sport headlights
-        addCarHeadlights(group, 'sport');
-        addCarTaillights(group);
-    }
-    
-    // PORSCHE - Classic 911
-    function createPorscheModel(group) {
-        const bodyMat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 90 });
-        const glassMat = new THREE.MeshPhongMaterial({ color: 0x111111, shininess: 90 });
-        
-        // Main rounded body
-        const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.9, 5.2), bodyMat);
-        body.position.y = 0.65;
-        group.add(body);
-        
-        // Rounded front
-        const front = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 0.4, 16, 1, false, 0, Math.PI), bodyMat);
-        front.rotation.z = Math.PI / 2;
-        front.position.set(0, 0.65, 2.6);
-        group.add(front);
-        
-        // Long sloping rear (911 signature)
-        const rear = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.7, 2), bodyMat);
-        rear.position.set(0, 1, -2.6);
-        rear.rotation.x = -0.15;
-        group.add(rear);
-        
-        // Cabin
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.55, 2), bodyMat);
-        cabin.position.set(0, 1.4, -0.4);
-        group.add(cabin);
-        
-        // Windshield
-        const windshield = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.6), glassMat);
-        windshield.position.set(0, 1.55, 0.5);
-        windshield.rotation.x = -Math.PI / 4;
-        group.add(windshield);
-        
-        // Side windows
-        const sideWinGeo = new THREE.PlaneGeometry(1.6, 0.45);
-        const leftWin = new THREE.Mesh(sideWinGeo, glassMat);
-        leftWin.position.set(-1.41, 1.45, -0.4);
-        leftWin.rotation.y = -Math.PI / 2;
-        group.add(leftWin);
-        
-        const rightWin = new THREE.Mesh(sideWinGeo, glassMat);
-        rightWin.position.set(1.41, 1.45, -0.4);
-        rightWin.rotation.y = Math.PI / 2;
-        group.add(rightWin);
-        
-        // Rear window
-        const rearWindow = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.4), glassMat);
-        rearWindow.position.set(0, 1.5, -1.4);
-        rearWindow.rotation.x = Math.PI / 6;
-        group.add(rearWindow);
-        
-        // Wheels
-        addRealisticWheels(group, 1.5, 1.8);
-        
-        // Round headlights (911 signature)
-        addCarHeadlights(group, 'round');
-        addCarTaillights(group);
-    }
-    
-    // FERRARI - Italian supercar
-    function createFerrariModel(group) {
-        const bodyMat = new THREE.MeshPhongMaterial({ color: 0xff0000, shininess: 100, metalness: 0.4 });
-        const darkMat = new THREE.MeshPhongMaterial({ color: 0xcc0000 });
-        const glassMat = new THREE.MeshPhongMaterial({ color: 0x111111, shininess: 90 });
-        
-        // Lower body
-        const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.75, 6), bodyMat);
-        lowerBody.position.y = 0.575;
-        group.add(lowerBody);
+        // Lower body - wedge shape
+        ctx.fillStyle = bodyGrad;
+        ctx.beginPath();
+        ctx.moveTo(-80, 25);  // rear bottom
+        ctx.lineTo(-70, -5);  // rear deck
+        ctx.lineTo(-50, -25); // roof rear
+        ctx.lineTo(0, -30);   // roof center
+        ctx.lineTo(40, -25);  // roof front
+        ctx.lineTo(70, -5);   // hood
+        ctx.lineTo(85, 10);   // nose tip
+        ctx.lineTo(80, 25);   // front bumper
+        ctx.lineTo(55, 35);   // front wheel well
+        ctx.lineTo(25, 35);   // between wheels
+        ctx.lineTo(-25, 35);  // rear wheel well start
+        ctx.lineTo(-55, 35); // rear wheel
+        ctx.closePath();
+        ctx.fill();
         
         // Upper cabin
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.55, 2.2), bodyMat);
-        cabin.position.set(0, 1.275, -0.3);
-        group.add(cabin);
+        ctx.fillStyle = bodyGrad;
+        ctx.beginPath();
+        ctx.moveTo(-45, -10);
+        ctx.lineTo(-30, -30);
+        ctx.lineTo(30, -30);
+        ctx.lineTo(45, -15);
+        ctx.lineTo(40, -5);
+        ctx.lineTo(-40, -5);
+        ctx.closePath();
+        ctx.fill();
         
-        // Hood
-        const hood = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.2, 2), bodyMat);
-        hood.position.set(0, 1.075, 1.8);
-        group.add(hood);
+        // Windows - dark tinted
+        ctx.fillStyle = windowColor;
+        ctx.beginPath();
+        ctx.moveTo(-35, -12);
+        ctx.lineTo(-25, -28);
+        ctx.lineTo(25, -28);
+        ctx.lineTo(35, -15);
+        ctx.lineTo(30, -8);
+        ctx.lineTo(-30, -8);
+        ctx.closePath();
+        ctx.fill();
         
-        // Rear deck
-        const rear = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.35, 2), bodyMat);
-        rear.position.set(0, 1.1, -2.3);
-        group.add(rear);
+        // Side air intake
+        ctx.fillStyle = darkColor;
+        ctx.beginPath();
+        ctx.moveTo(50, 5);
+        ctx.lineTo(70, 0);
+        ctx.lineTo(70, 15);
+        ctx.lineTo(50, 15);
+        ctx.closePath();
+        ctx.fill();
         
-        // Windshield
-        const windshield = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.7), glassMat);
-        windshield.position.set(0, 1.5, 0.7);
-        windshield.rotation.x = -Math.PI / 3.5;
-        group.add(windshield);
+        // Y-SHAPED HEADLIGHTS
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 15;
         
-        // Side windows
-        const sideWinGeo = new THREE.PlaneGeometry(1.7, 0.5);
-        const leftWin = new THREE.Mesh(sideWinGeo, glassMat);
-        leftWin.position.set(-1.31, 1.4, -0.3);
-        leftWin.rotation.y = -Math.PI / 2;
-        group.add(leftWin);
+        // Left Y light
+        ctx.beginPath();
+        ctx.moveTo(72, 5);
+        ctx.lineTo(78, 0);
+        ctx.lineTo(78, 12);
+        ctx.lineTo(75, 15);
+        ctx.lineTo(70, 10);
+        ctx.closePath();
+        ctx.fill();
         
-        const rightWin = new THREE.Mesh(sideWinGeo, glassMat);
-        rightWin.position.set(1.31, 1.4, -0.3);
-        rightWin.rotation.y = Math.PI / 2;
-        group.add(rightWin);
+        // Right Y light
+        ctx.beginPath();
+        ctx.moveTo(78, 5);
+        ctx.lineTo(84, 0);
+        ctx.lineTo(84, 12);
+        ctx.lineTo(81, 15);
+        ctx.lineTo(76, 10);
+        ctx.closePath();
+        ctx.fill();
         
-        // Ferrari logo on hood
-        const logo = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.02, 16), new THREE.MeshPhongMaterial({ color: 0xffff00 }));
-        logo.rotation.x = Math.PI / 2;
-        logo.position.set(0, 1.18, 1.8);
-        group.add(logo);
-        
-        // Front splitter
-        const splitter = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 0.3), darkMat);
-        splitter.position.set(0, 0.25, 3.1);
-        group.add(splitter);
-        
-        // Rear diffuser
-        const diffuser = new THREE.Mesh(new THREE.BoxGeometry(3, 0.08, 0.4), darkMat);
-        diffuser.position.set(0, 0.25, -3.1);
-        group.add(diffuser);
-        
-        // Small spoiler
-        const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.08, 0.4), darkMat);
-        spoiler.position.set(0, 1.4, -2.6);
-        group.add(spoiler);
+        ctx.shadowBlur = 0;
         
         // Wheels
-        addRealisticWheels(group, 1.5, 1.8);
+        drawWheel2D(ctx, -40, 35, 18);
+        drawWheel2D(ctx, 40, 35, 18);
+        
+        // Rear spoiler
+        ctx.fillStyle = darkColor;
+        ctx.beginPath();
+        ctx.moveTo(-75, -15);
+        ctx.lineTo(-40, -15);
+        ctx.lineTo(-40, -8);
+        ctx.lineTo(-75, -8);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Spoiler supports
+        ctx.fillRect(-70, -8, 4, 8);
+        ctx.fillRect(-50, -8, 4, 8);
+        
+        // Taillights
+        ctx.fillStyle = '#ff0000';
+        ctx.shadowColor = '#ff0000';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(-78, 5, 12, 4);
+        ctx.fillRect(-62, 5, 12, 4);
+        ctx.shadowBlur = 0;
+    }
+    
+    // BUGATTI - Elegant teardrop
+    function drawBugatti2D(ctx, bodyColor, darkColor, windowColor, lightX) {
+        const bodyGrad = ctx.createLinearGradient(-70, -15, 70, 25);
+        bodyGrad.addColorStop(0, darkColor);
+        bodyGrad.addColorStop(0.4, bodyColor);
+        bodyGrad.addColorStop(0.6, bodyColor);
+        bodyGrad.addColorStop(1, darkColor);
+        
+        // Long elegant body
+        ctx.fillStyle = bodyGrad;
+        ctx.beginPath();
+        ctx.moveTo(-90, 30);   // rear
+        ctx.lineTo(-85, 0);    // rear deck
+        ctx.lineTo(-60, -20);  // cabin rear
+        ctx.lineTo(-20, -25);  // roof
+        ctx.lineTo(30, -25);   // roof front
+        ctx.lineTo(70, -10);   // hood
+        ctx.quadraticCurveTo(90, 5, 85, 20); // rounded nose
+        ctx.lineTo(70, 30);    // front bumper
+        ctx.lineTo(50, 38);    // wheel well
+        ctx.lineTo(20, 38);    // between wheels
+        ctx.lineTo(-30, 38);   // rear wheel well
+        ctx.lineTo(-60, 38);   // rear wheel
+        ctx.closePath();
+        ctx.fill();
+        
+        // Windows
+        ctx.fillStyle = windowColor;
+        ctx.beginPath();
+        ctx.moveTo(-55, -5);
+        ctx.lineTo(-40, -22);
+        ctx.lineTo(25, -22);
+        ctx.lineTo(50, -10);
+        ctx.lineTo(40, -3);
+        ctx.lineTo(-45, -3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Horse collar grille
+        ctx.fillStyle = '#888888';
+        ctx.beginPath();
+        ctx.ellipse(82, 5, 8, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Chrome line
+        ctx.strokeStyle = '#aaaaaa';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-85, 10);
+        ctx.lineTo(80, 10);
+        ctx.stroke();
+        
+        // Round headlights
+        ctx.fillStyle = '#ffffcc';
+        ctx.shadowColor = '#ffffcc';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(75, -5, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(75, 15, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Wheels
+        drawWheel2D(ctx, -45, 38, 18);
+        drawWheel2D(ctx, 35, 38, 18);
+        
+        // Taillight bar
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(-88, 5, 50, 4);
+    }
+    
+    // SUPRA - Sporty compact
+    function drawSupra2D(ctx, bodyColor, darkColor, windowColor, lightX) {
+        const bodyGrad = ctx.createLinearGradient(-55, -15, 55, 20);
+        bodyGrad.addColorStop(0, darkColor);
+        bodyGrad.addColorStop(0.5, bodyColor);
+        bodyGrad.addColorStop(1, darkColor);
+        
+        // Sporty body
+        ctx.fillStyle = bodyGrad;
+        ctx.beginPath();
+        ctx.moveTo(-60, 25);
+        ctx.lineTo(-55, -5);
+        ctx.lineTo(-40, -22);
+        ctx.lineTo(0, -25);
+        ctx.lineTo(35, -20);
+        ctx.lineTo(60, 0);
+        ctx.lineTo(65, 20);
+        ctx.lineTo(55, 30);
+        ctx.lineTo(35, 35);
+        ctx.lineTo(10, 35);
+        ctx.lineTo(-20, 35);
+        ctx.lineTo(-45, 35);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Windows
+        ctx.fillStyle = windowColor;
+        ctx.beginPath();
+        ctx.moveTo(-35, -8);
+        ctx.lineTo(-25, -20);
+        ctx.lineTo(20, -20);
+        ctx.lineTo(40, -10);
+        ctx.lineTo(30, -3);
+        ctx.lineTo(-30, -3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Racing stripe
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-2, -8, 4, 20);
+        
+        // Big spoiler
+        ctx.fillStyle = darkColor;
+        ctx.fillRect(-65, -20, 50, 8);
+        ctx.fillRect(-60, -12, 6, 10);
+        ctx.fillRect(-35, -12, 6, 10);
         
         // Sport headlights
-        addCarHeadlights(group, 'sport');
-        addCarTaillights(group);
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(58, 0, 10, 4);
+        ctx.shadowBlur = 0;
+        
+        // Wheels
+        drawWheel2D(ctx, -30, 35, 17);
+        drawWheel2D(ctx, 25, 35, 17);
+        
+        // Taillights
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(-58, 5, 10, 4);
     }
     
-    // Helper: Add realistic wheels
-    function addRealisticWheels(group, xPos, zPos) {
-        const tireMat = new THREE.MeshPhongMaterial({ color: 0x111111, shininess: 30 });
-        const rimMat = new THREE.MeshPhongMaterial({ color: 0x888888, shininess: 80 });
+    // PORSCHE - Classic rounded 911
+    function drawPorsche2D(ctx, bodyColor, darkColor, windowColor, lightX) {
+        const bodyGrad = ctx.createLinearGradient(-60, -20, 60, 25);
+        bodyGrad.addColorStop(0, '#e0e0e0');
+        bodyGrad.addColorStop(0.4, bodyColor);
+        bodyGrad.addColorStop(0.6, bodyColor);
+        bodyGrad.addColorStop(1, '#e0e0e0');
         
-        const positions = [
-            [-xPos, 0.35, zPos],
-            [xPos, 0.35, zPos],
-            [-xPos, 0.35, -zPos],
-            [xPos, 0.35, -zPos]
-        ];
+        // Rounded body
+        ctx.fillStyle = bodyGrad;
+        ctx.beginPath();
+        ctx.moveTo(-70, 25);
+        ctx.lineTo(-65, 0);
+        ctx.quadraticCurveTo(-50, -15, -20, -20); // curved rear
+        ctx.lineTo(20, -20);
+        ctx.quadraticCurveTo(55, -15, 65, 5);     // curved front
+        ctx.quadraticCurveTo(70, 15, 65, 25);
+        ctx.lineTo(50, 32);
+        ctx.lineTo(20, 32);
+        ctx.lineTo(-20, 32);
+        ctx.lineTo(-50, 32);
+        ctx.closePath();
+        ctx.fill();
         
-        positions.forEach(pos => {
-            const wheelGroup = new THREE.Group();
-            
-            // Tire
-            const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.25, 16), tireMat);
-            tire.rotation.z = Math.PI / 2;
-            wheelGroup.add(tire);
-            
-            // Rim
-            const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.26, 16), rimMat);
-            rim.rotation.z = Math.PI / 2;
-            wheelGroup.add(rim);
-            
-            // Spokes
-            for (let i = 0; i < 5; i++) {
-                const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.04, 0.04), rimMat);
-                spoke.rotation.x = (i / 5) * Math.PI * 2;
-                spoke.rotation.z = Math.PI / 2;
-                wheelGroup.add(spoke);
-            }
-            
-            wheelGroup.position.set(...pos);
-            group.add(wheelGroup);
-        });
+        // Long sloping rear (911 signature)
+        ctx.fillStyle = '#eeeeee';
+        ctx.beginPath();
+        ctx.moveTo(-70, 5);
+        ctx.lineTo(-65, -15);
+        ctx.lineTo(-50, -5);
+        ctx.lineTo(-55, 10);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Windows
+        ctx.fillStyle = windowColor;
+        ctx.beginPath();
+        ctx.moveTo(-40, -8);
+        ctx.lineTo(-25, -18);
+        ctx.lineTo(25, -18);
+        ctx.lineTo(45, -10);
+        ctx.lineTo(35, -3);
+        ctx.lineTo(-35, -3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Rear window
+        ctx.beginPath();
+        ctx.moveTo(-65, -5);
+        ctx.lineTo(-40, -12);
+        ctx.lineTo(-35, -5);
+        ctx.lineTo(-60, 5);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Round headlights
+        ctx.fillStyle = '#ffffcc';
+        ctx.shadowColor = '#ffffcc';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(58, 0, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Wheels
+        drawWheel2D(ctx, -35, 32, 16, '#333333', '#dddddd');
+        drawWheel2D(ctx, 30, 32, 16, '#333333', '#dddddd');
+        
+        // Taillight bar
+        ctx.fillStyle = '#cc0000';
+        ctx.fillRect(-65, 8, 40, 3);
     }
     
-    // Helper: Add headlights
-    function addCarHeadlights(group, style) {
-        const lightMat = new THREE.MeshPhongMaterial({ 
-            color: 0xffffcc, 
-            emissive: 0xffffcc, 
-            emissiveIntensity: 0.6 
-        });
+    // FERRARI - Sleek Italian
+    function drawFerrari2D(ctx, bodyColor, darkColor, windowColor, lightX) {
+        const bodyGrad = ctx.createLinearGradient(-60, -15, 60, 20);
+        bodyGrad.addColorStop(0, darkColor);
+        bodyGrad.addColorStop(0.5, bodyColor);
+        bodyGrad.addColorStop(1, darkColor);
         
-        if (style === 'angular') {
-            // Lamborghini style - sharp angles
-            const left = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.15, 0.1), lightMat);
-            left.position.set(-1.2, 0.85, 3.05);
-            left.rotation.y = 0.1;
-            group.add(left);
-            
-            const right = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.15, 0.1), lightMat);
-            right.position.set(1.2, 0.85, 3.05);
-            right.rotation.y = -0.1;
-            group.add(right);
-        } else if (style === 'round') {
-            // Bugatti/Porsche style - round
-            const left = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 8), lightMat);
-            left.position.set(-1.1, 0.85, 3);
-            group.add(left);
-            
-            const right = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 8), lightMat);
-            right.position.set(1.1, 0.85, 3);
-            group.add(right);
-        } else {
-            // Sport style - slim rectangles
-            const left = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.1), lightMat);
-            left.position.set(-1, 0.85, 3);
-            group.add(left);
-            
-            const right = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.1), lightMat);
-            right.position.set(1, 0.85, 3);
-            group.add(right);
+        // Sleek low body
+        ctx.fillStyle = bodyGrad;
+        ctx.beginPath();
+        ctx.moveTo(-65, 22);
+        ctx.lineTo(-60, -3);
+        ctx.lineTo(-45, -18);
+        ctx.lineTo(0, -22);
+        ctx.lineTo(40, -15);
+        ctx.lineTo(65, 5);
+        ctx.lineTo(68, 18);
+        ctx.lineTo(58, 28);
+        ctx.lineTo(38, 32);
+        ctx.lineTo(10, 32);
+        ctx.lineTo(-20, 32);
+        ctx.lineTo(-48, 32);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Windows
+        ctx.fillStyle = windowColor;
+        ctx.beginPath();
+        ctx.moveTo(-38, -8);
+        ctx.lineTo(-25, -18);
+        ctx.lineTo(25, -18);
+        ctx.lineTo(42, -8);
+        ctx.lineTo(32, -2);
+        ctx.lineTo(-30, -2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Front splitter
+        ctx.fillStyle = darkColor;
+        ctx.fillRect(55, 25, 20, 4);
+        
+        // Ferrari logo
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath();
+        ctx.ellipse(35, -5, 6, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Sport headlights
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(60, 0, 8, 3);
+        ctx.shadowBlur = 0;
+        
+        // Small spoiler
+        ctx.fillStyle = darkColor;
+        ctx.fillRect(-60, -15, 40, 5);
+        
+        // Wheels
+        drawWheel2D(ctx, -30, 32, 16);
+        drawWheel2D(ctx, 25, 32, 16);
+        
+        // Taillights
+        ctx.fillStyle = '#ff0000';
+        ctx.beginPath();
+        ctx.arc(-58, 5, 4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    // Helper: Draw wheel
+    function drawWheel2D(ctx, x, y, radius, tireColor = '#111111', rimColor = '#666666') {
+        // Tire
+        ctx.fillStyle = tireColor;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Rim
+        ctx.fillStyle = rimColor;
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Spokes
+        ctx.strokeStyle = '#444444';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 5; i++) {
+            const angle = (i / 5) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + Math.cos(angle) * radius * 0.5, y + Math.sin(angle) * radius * 0.5);
+            ctx.stroke();
         }
     }
     
-    // Helper: Add taillights
-    function addCarTaillights(group) {
-        const tailMat = new THREE.MeshPhongMaterial({ 
-            color: 0xff0000, 
-            emissive: 0xff0000, 
-            emissiveIntensity: 0.4 
-        });
-        
-        const left = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.08), tailMat);
-        left.position.set(-1, 1, -3.05);
-        group.add(left);
-        
-        const right = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.08), tailMat);
-        right.position.set(1, 1, -3.05);
-        group.add(right);
-    }
+    // Remove old 3D model functions
+    function createUniqueCarModel(carType) { return new THREE.Group(); }
+    function createLamborghiniModel(group) {}
+    function createBugattiModel(group) {}
+    function createSupraModel(group) {}
+    function createPorscheModel(group) {}
+    function createFerrariModel(group) {}
+    function addRealisticWheels(group, xPos, zPos) {}
+    function addCarHeadlights(group, style) {}
+    function addCarTaillights(group) {}
 
     function createFallbackCarPreview(carType) {
         const previewContainer = document.getElementById('car-preview-3d');
