@@ -495,8 +495,10 @@ body {
 /* Selection Grid for Avatar */
 .selection-grid {
     display: flex;
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 12px;
     justify-content: center;
+    max-width: 860px;
     margin-bottom: 20px;
 }
 
@@ -508,7 +510,9 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
-    min-width: 120px;
+    min-width: 130px;
+    max-width: 170px;
+    flex: 1 1 150px;
 }
 
 .selection-card:hover {
@@ -524,70 +528,69 @@ body {
 
 .card-preview {
     width: 80px;
-    height: 80px;
+    height: 58px;
     margin: 0 auto 10px;
     border-radius: 8px;
     background: linear-gradient(135deg, var(--primary), var(--secondary));
 }
 
-.panda-p1 { background: linear-gradient(135deg, #ff6b6b, #ff4444); }
-.panda-p2 { background: linear-gradient(135deg, #4dabf7, #339af0); }
-.panda-p3 { background: linear-gradient(135deg, #51cf66, #37b24d); }
+/* Avatar card accent colors (actual preview uses GLB panel) */
+.avatar-po {
+    background: linear-gradient(135deg, #d9c8a0, #9f7f53);
+    border: 2px solid #8a6a3f;
+}
+.avatar-po-mystic {
+    background: linear-gradient(135deg, #7f62ff, #5a3ccc);
+    border: 2px solid #4c2fb2;
+}
+.avatar-tigress {
+    background: linear-gradient(135deg, #ff8a3d, #d94f22);
+    border: 2px solid #b43e1a;
+}
+.avatar-tai-lung {
+    background: linear-gradient(135deg, #5d74a0, #3f4f73);
+    border: 2px solid #30405d;
+}
+.avatar-zhen {
+    background: linear-gradient(135deg, #59c7ff, #2a84d8);
+    border: 2px solid #1e69b3;
+}
+.avatar-free-fire {
+    background: linear-gradient(135deg, #5eff8f, #1ab56a);
+    border: 2px solid #149153;
+}
 
-/* New Avatar Styles */
-.avatar-classic { 
-    background: linear-gradient(135deg, #ffffff, #f0f0f0);
-    border: 2px solid #333;
+/* Car card accent colors (actual preview uses GLB panel) */
+.car-bmw-m4-csl {
+    background: linear-gradient(135deg, #3f89ff, #1253b4);
+    border: 2px solid #0f4697;
 }
-.avatar-sport { 
-    background: linear-gradient(135deg, #ff6b35, #ff4444);
-    border: 2px solid #cc3300;
+.car-ferrari-sp38 {
+    background: linear-gradient(135deg, #ff3c3c, #b71010);
+    border: 2px solid #8f0d0d;
 }
-.avatar-pro { 
-    background: linear-gradient(135deg, #4dabf7, #339af0);
-    border: 2px solid #0066cc;
+.car-revuelto {
+    background: linear-gradient(135deg, #ffd951, #d18f00);
+    border: 2px solid #a66d00;
 }
-.avatar-ninja { 
-    background: linear-gradient(135deg, #333333, #000000);
-    border: 2px solid #666;
-}
-.avatar-mystic { 
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
-    border: 2px solid #6a1b9a;
-    box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);
-}
-
-/* Luxury Car Selection Styles */
-.car-lamborghini { 
-    background: linear-gradient(135deg, #0047ab, #002855);
-    border: 2px solid #001a33;
-    box-shadow: 0 0 15px rgba(0, 71, 171, 0.3);
-}
-.car-bugatti { 
-    background: linear-gradient(135deg, #1a1a1a, #000000);
-    border: 2px solid #000000;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-}
-.car-supra { 
-    background: linear-gradient(135deg, #ff69b4, #ff1493);
-    border: 2px solid #c71585;
-    box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
-}
-.car-porsche { 
-    background: linear-gradient(135deg, #ffffff, #f0f0f0);
-    border: 2px solid #cccccc;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-}
-.car-ferrari { 
-    background: linear-gradient(135deg, #ff0000, #cc0000);
-    border: 2px solid #990000;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+.car-aventador {
+    background: linear-gradient(135deg, #c9c9c9, #7f7f7f);
+    border: 2px solid #666666;
 }
 
 .selection-card span {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text);
+}
+
+.selection-card small {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    line-height: 1.2;
+    word-break: break-word;
 }
 
 /* 3D Preview Styles */

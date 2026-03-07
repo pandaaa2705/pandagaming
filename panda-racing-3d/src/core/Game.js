@@ -9,6 +9,25 @@ import { SaveSystem } from './SaveSystem.js';
 import { AssetLoader } from './AssetLoader.js';
 import { SoundSystem } from './SoundSystem.js';
 
+const CAR_MODEL_PATHS = {
+    car_bmw_m4_csl_2023: './assets/models/cars/bmw_m4_csl_2023.glb',
+    car_ferrari_sp38_2018: './assets/models/cars/2018_ferrari_sp38_deborah.glb',
+    car_lamborghini_revuelto_2024: './assets/models/cars/2024_lamborghini_revuelto.glb',
+    car_lamborghini_aventador_2018: './assets/models/cars/2018_lamborghini_aventador_lp740-4_s_roadster.glb'
+};
+
+const AVATAR_MODEL_PATHS = {
+    avatar_po_kung_fu_panda: './assets/models/avatars/po_kung_fu_panda.glb',
+    avatar_po_mystic_robes: './assets/models/avatars/kung-_fu_panda_-_po_mystic_robes.glb',
+    avatar_tigress: './assets/models/avatars/tigress_kung_fu_panda_chi_master.glb',
+    avatar_tai_lung: './assets/models/avatars/tai_lung_kung_fu_panda_chi_master.glb',
+    avatar_zhen: './assets/models/avatars/zhen_kung_fu_panda_chi_master.glb',
+    avatar_panda_free_fire: './assets/models/avatars/panda_free_fire.glb'
+};
+
+const DEFAULT_CAR_MODEL = 'car_bmw_m4_csl_2023';
+const DEFAULT_AVATAR_MODEL = 'avatar_po_kung_fu_panda';
+
 export class Game {
     constructor() {
         this.container = document.getElementById('game-container');
@@ -49,11 +68,16 @@ export class Game {
     }
 
     async loadAllAssets() {
-        // Try loading models (placeholders will be used if 404)
+        const carLoads = Object.entries(CAR_MODEL_PATHS).map(([modelId, modelPath]) => (
+            this.assetLoader.loadModel(modelPath, modelId)
+        ));
+        const avatarLoads = Object.entries(AVATAR_MODEL_PATHS).map(([modelId, modelPath]) => (
+            this.assetLoader.loadModel(modelPath, modelId)
+        ));
+
         await Promise.all([
-            this.assetLoader.loadModel('./assets/models/cars/car_player.glb', 'car_player'),
-            this.assetLoader.loadModel('./assets/models/cars/car_ai.glb', 'car_ai'),
-            this.assetLoader.loadModel('./assets/models/avatars/panda_player.glb', 'panda_player'),
+            ...carLoads,
+            ...avatarLoads,
             // Audio
             this.assetLoader.loadAudio('./assets/sounds/engine.mp3', 'engine'),
             this.assetLoader.loadAudio('./assets/sounds/nitro.mp3', 'nitro'),
@@ -206,12 +230,35 @@ export class Game {
 
         // Player car
         const playerStats = this.saveData.carStats[this.saveData.selectedCarId] || { speed: 1, accel: 1, nitro: 1, handling: 1 };
-        const selectedCar = localStorage.getItem('selectedCar') || 'car_lamborghini';
-        this.playerCar = new Car(this.scene, true, this.environment, playerStats, this.assetLoader, selectedCar);
+        const selectedCar = localStorage.getItem('selectedCar');
+        const selectedAvatar = localStorage.getItem('selectedAvatar');
+        const selectedCarModel = CAR_MODEL_PATHS[selectedCar] ? selectedCar : DEFAULT_CAR_MODEL;
+        const selectedAvatarModel = AVATAR_MODEL_PATHS[selectedAvatar] ? selectedAvatar : DEFAULT_AVATAR_MODEL;
+        const aiCarModel = Object.keys(CAR_MODEL_PATHS).find((modelId) => modelId !== selectedCarModel) || selectedCarModel;
+
+        this.playerCar = new Car(
+            this.scene,
+            true,
+            this.environment,
+            playerStats,
+            this.assetLoader,
+            'car_lamborghini',
+            selectedCarModel,
+            selectedAvatarModel
+        );
         this.cars.push(this.playerCar);
 
         // Computer car
-        this.computerCar = new Car(this.scene, false, this.environment, null, this.assetLoader);
+        this.computerCar = new Car(
+            this.scene,
+            false,
+            this.environment,
+            null,
+            this.assetLoader,
+            'car_lamborghini',
+            aiCarModel,
+            selectedAvatarModel
+        );
         this.cars.push(this.computerCar);
 
         // Obstacles manager

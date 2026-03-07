@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles/game.css">
+    <link rel="stylesheet" href="./styles/game.css?v=20260307a">
     <script type="importmap">
         {
             "imports": {
@@ -57,31 +57,36 @@
                 <h2 class="game-title">SELECT YOUR DRIVER</h2>
                 <div class="preview-container">
                     <div id="avatar-preview-3d" class="preview-3d"></div>
-                    <div class="selection-grid">
-                        <div class="selection-card active" data-id="panda_classic">
-                            <div class="card-preview avatar-classic"></div>
-                            <span>Classic Panda</span>
-                            <small>Original racing panda</small>
+                    <div class="selection-grid" id="avatar-selection-grid">
+                        <div class="selection-card active" data-id="avatar_po_kung_fu_panda">
+                            <div class="card-preview avatar-po"></div>
+                            <span>Po (Classic)</span>
+                            <small>po_kung_fu_panda.glb</small>
                         </div>
-                        <div class="selection-card" data-id="panda_sport">
-                            <div class="card-preview avatar-sport"></div>
-                            <span>Sport Panda</span>
-                            <small>Fast & agile</small>
+                        <div class="selection-card" data-id="avatar_po_mystic_robes">
+                            <div class="card-preview avatar-po-mystic"></div>
+                            <span>Po (Mystic Robes)</span>
+                            <small>kung-_fu_panda_-_po_mystic_robes.glb</small>
                         </div>
-                        <div class="selection-card" data-id="panda_pro">
-                            <div class="card-preview avatar-pro"></div>
-                            <span>Pro Panda</span>
-                            <small>Professional racer</small>
+                        <div class="selection-card" data-id="avatar_tigress">
+                            <div class="card-preview avatar-tigress"></div>
+                            <span>Tigress</span>
+                            <small>tigress_kung_fu_panda_chi_master.glb</small>
                         </div>
-                        <div class="selection-card" data-id="panda_ninja">
-                            <div class="card-preview avatar-ninja"></div>
-                            <span>Ninja Panda</span>
-                            <small>Stealth & speed</small>
+                        <div class="selection-card" data-id="avatar_tai_lung">
+                            <div class="card-preview avatar-tai-lung"></div>
+                            <span>Tai Lung</span>
+                            <small>tai_lung_kung_fu_panda_chi_master.glb</small>
                         </div>
-                        <div class="selection-card" data-id="panda_mystic">
-                            <div class="card-preview avatar-mystic"></div>
-                            <span>Mystic Panda</span>
-                            <small>Magic powers</small>
+                        <div class="selection-card" data-id="avatar_zhen">
+                            <div class="card-preview avatar-zhen"></div>
+                            <span>Zhen</span>
+                            <small>zhen_kung_fu_panda_chi_master.glb</small>
+                        </div>
+                        <div class="selection-card" data-id="avatar_panda_free_fire">
+                            <div class="card-preview avatar-free-fire"></div>
+                            <span>Panda Free Fire</span>
+                            <small>panda_free_fire.glb</small>
                         </div>
                     </div>
                 </div>
@@ -95,31 +100,26 @@
                 <h2 class="game-title">SELECT YOUR RIDE</h2>
                 <div class="preview-container">
                     <div id="car-preview-3d" class="preview-3d"></div>
-                    <div class="selection-grid">
-                        <div class="selection-card active" data-id="car_lamborghini">
-                            <div class="card-preview car-lamborghini"></div>
-                            <span>Lamborghini</span>
-                            <small>Navy Blue Speed</small>
+                    <div class="selection-grid" id="car-selection-grid">
+                        <div class="selection-card active" data-id="car_bmw_m4_csl_2023">
+                            <div class="card-preview car-bmw-m4-csl"></div>
+                            <span>BMW M4 CSL 2023</span>
+                            <small>bmw_m4_csl_2023.glb</small>
                         </div>
-                        <div class="selection-card" data-id="car_bugatti">
-                            <div class="card-preview car-bugatti"></div>
-                            <span>Bugatti</span>
-                            <small>Black Excellence</small>
+                        <div class="selection-card" data-id="car_ferrari_sp38_2018">
+                            <div class="card-preview car-ferrari-sp38"></div>
+                            <span>Ferrari SP38 2018</span>
+                            <small>2018_ferrari_sp38_deborah.glb</small>
                         </div>
-                        <div class="selection-card" data-id="car_supra">
-                            <div class="card-preview car-supra"></div>
-                            <span>Supra</span>
-                            <small>Pink Power</small>
+                        <div class="selection-card" data-id="car_lamborghini_revuelto_2024">
+                            <div class="card-preview car-revuelto"></div>
+                            <span>Lamborghini Revuelto 2024</span>
+                            <small>2024_lamborghini_revuelto.glb</small>
                         </div>
-                        <div class="selection-card" data-id="car_porsche">
-                            <div class="card-preview car-porsche"></div>
-                            <span>Porsche</span>
-                            <small>White Luxury</small>
-                        </div>
-                        <div class="selection-card" data-id="car_ferrari">
-                            <div class="card-preview car-ferrari"></div>
-                            <span>Ferrari</span>
-                            <small>Red Passion</small>
+                        <div class="selection-card" data-id="car_lamborghini_aventador_2018">
+                            <div class="card-preview car-aventador"></div>
+                            <span>Aventador LP740-4 S 2018</span>
+                            <small>2018_lamborghini_aventador_lp740-4_s_roadster.glb</small>
                         </div>
                     </div>
                 </div>
@@ -333,7 +333,7 @@
         </div>
     </div>
 
-    <script type="module" src="./src/main.js"></script>
+    <script type="module" src="./src/main.js?v=20260307a"></script>
 </body>
 
 </html>

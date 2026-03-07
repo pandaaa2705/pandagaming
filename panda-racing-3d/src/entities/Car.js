@@ -1,7 +1,17 @@
 import * as THREE from 'three';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 export class Car {
-    constructor(scene, isPlayer, environment, stats = null, assetLoader = null, carType = 'car_lamborghini') {
+    constructor(
+        scene,
+        isPlayer,
+        environment,
+        stats = null,
+        assetLoader = null,
+        carType = 'car_lamborghini',
+        carModelName = null,
+        avatarModelName = null
+    ) {
         this.scene = scene;
         this.isPlayer = isPlayer;
         this.environment = environment;
@@ -9,6 +19,8 @@ export class Car {
         this.stats = stats || { speed: 1, accel: 1, nitro: 1, handling: 1 };
         this.assetLoader = assetLoader;
         this.carType = carType;
+        this.carModelName = carModelName;
+        this.avatarModelName = avatarModelName;
 
         // State
         const startZ = 0;
@@ -46,13 +58,16 @@ export class Car {
     }
 
     init() {
-        const modelName = this.isPlayer ? 'car_player' : 'car_ai';
+        const modelName = this.carModelName || (this.isPlayer ? 'car_player' : 'car_ai');
         const customModel = this.assetLoader ? this.assetLoader.getAsset(modelName) : null;
 
         if (customModel) {
-            this.mesh = customModel.clone();
+            const modelRoot = SkeletonUtils.clone(customModel);
+            this.mesh = new THREE.Group();
+            this.mesh.add(modelRoot);
+            this.fitCustomModelToCarSpace(modelRoot);
             this.wheels = [];
-            this.mesh.traverse(n => {
+            modelRoot.traverse(n => {
                 if (n.name.toLowerCase().includes('wheel')) this.wheels.push(n);
             });
         } else {
@@ -64,6 +79,27 @@ export class Car {
         this.addPandaDriver();
 
         this.scene.add(this.mesh);
+    }
+
+    fitCustomModelToCarSpace(modelRoot) {
+        const bounds = new THREE.Box3().setFromObject(modelRoot);
+        const size = bounds.getSize(new THREE.Vector3());
+        const center = bounds.getCenter(new THREE.Vector3());
+
+        const footprint = Math.max(size.x, size.z, 0.001);
+        const scale = 6.5 / footprint;
+        modelRoot.scale.setScalar(scale);
+        modelRoot.position.set(
+            -center.x * scale,
+            -bounds.min.y * scale + 0.1,
+            -center.z * scale
+        );
+
+        modelRoot.traverse((node) => {
+            if (!node.isMesh) return;
+            node.castShadow = true;
+            node.receiveShadow = true;
+        });
     }
 
     createSportCar() {
@@ -819,6 +855,39 @@ export class Car {
     }
 
     addPandaDriver() {
+        const avatarAssetName = this.avatarModelName || 'panda_player';
+        const customAvatar = this.assetLoader ? this.assetLoader.getAsset(avatarAssetName) : null;
+
+        if (customAvatar) {
+            const pandaGroup = new THREE.Group();
+            const avatarRoot = SkeletonUtils.clone(customAvatar);
+
+            avatarRoot.traverse((node) => {
+                if (!node.isMesh) return;
+                node.castShadow = true;
+                node.receiveShadow = true;
+            });
+
+            const bounds = new THREE.Box3().setFromObject(avatarRoot);
+            const size = bounds.getSize(new THREE.Vector3());
+            const center = bounds.getCenter(new THREE.Vector3());
+            const scale = 1.8 / Math.max(size.y, 0.001);
+
+            avatarRoot.scale.setScalar(scale);
+            avatarRoot.position.set(
+                -center.x * scale,
+                -bounds.min.y * scale,
+                -center.z * scale
+            );
+
+            pandaGroup.add(avatarRoot);
+            pandaGroup.position.set(0.4, 0.3, 0);
+            pandaGroup.rotation.y = Math.PI;
+            this.mesh.add(pandaGroup);
+            this.pandaDriver = pandaGroup;
+            return;
+        }
+
         const pandaGroup = new THREE.Group();
 
         // Main body - more detailed

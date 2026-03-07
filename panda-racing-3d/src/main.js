@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { Game } from './core/Game.js';
 import { SaveSystem } from './core/SaveSystem.js';
 
@@ -16,6 +18,143 @@ window.addEventListener('DOMContentLoaded', () => {
     const carScreen = document.getElementById('car-screen');
 
     let saveData = SaveSystem.load();
+    const previewLoader = new GLTFLoader();
+
+    const AVATAR_MODELS = {
+        avatar_po_kung_fu_panda: { path: './assets/models/avatars/po_kung_fu_panda.glb' },
+        avatar_po_mystic_robes: { path: './assets/models/avatars/kung-_fu_panda_-_po_mystic_robes.glb' },
+        avatar_tigress: { path: './assets/models/avatars/tigress_kung_fu_panda_chi_master.glb' },
+        avatar_tai_lung: { path: './assets/models/avatars/tai_lung_kung_fu_panda_chi_master.glb' },
+        avatar_zhen: { path: './assets/models/avatars/zhen_kung_fu_panda_chi_master.glb' },
+        avatar_panda_free_fire: { path: './assets/models/avatars/panda_free_fire.glb' }
+    };
+
+    const CAR_MODELS = {
+        car_bmw_m4_csl_2023: { path: './assets/models/cars/bmw_m4_csl_2023.glb' },
+        car_ferrari_sp38_2018: { path: './assets/models/cars/2018_ferrari_sp38_deborah.glb' },
+        car_lamborghini_revuelto_2024: { path: './assets/models/cars/2024_lamborghini_revuelto.glb' },
+        car_lamborghini_aventador_2018: { path: './assets/models/cars/2018_lamborghini_aventador_lp740-4_s_roadster.glb' }
+    };
+
+    const DEFAULT_AVATAR_ID = 'avatar_po_kung_fu_panda';
+    const DEFAULT_CAR_ID = 'car_bmw_m4_csl_2023';
+
+    function resolveSelectedId(storageKey, modelMap, fallbackId) {
+        const selected = localStorage.getItem(storageKey);
+        return selected && modelMap[selected] ? selected : fallbackId;
+    }
+
+    function disposePreviewRenderer(previewContainer) {
+        if (!previewContainer || !previewContainer._previewState) return;
+
+        const state = previewContainer._previewState;
+        if (state.animationFrameId) cancelAnimationFrame(state.animationFrameId);
+        if (state.scene) {
+            state.scene.traverse((node) => {
+                if (!node.isMesh) return;
+                if (node.geometry) node.geometry.dispose();
+                if (Array.isArray(node.material)) {
+                    node.material.forEach((material) => material.dispose && material.dispose());
+                } else if (node.material && node.material.dispose) {
+                    node.material.dispose();
+                }
+            });
+        }
+        if (state.renderer) state.renderer.dispose();
+        previewContainer._previewState = null;
+    }
+
+    function renderModelPreview(containerId, modelPath, spinSpeed = 0.01, options = {}) {
+        const previewContainer = document.getElementById(containerId);
+        if (!previewContainer) return;
+
+        const {
+            targetSize = 2.8,
+            minDistance = 3.5,
+            cameraDistanceFactor = 1.6,
+            cameraHeightFactor = 1.2,
+            yLift = 0
+        } = options;
+
+        disposePreviewRenderer(previewContainer);
+        previewContainer.innerHTML = '';
+
+        const width = previewContainer.clientWidth || 300;
+        const height = previewContainer.clientHeight || 200;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setClearColor(0x000000, 0);
+        previewContainer.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+        keyLight.position.set(5, 8, 6);
+        const fillLight = new THREE.DirectionalLight(0x88aaff, 0.35);
+        fillLight.position.set(-6, 5, -4);
+        scene.add(ambientLight, keyLight, fillLight);
+
+        const pivot = new THREE.Group();
+        scene.add(pivot);
+
+        const state = {
+            animationFrameId: 0,
+            scene,
+            renderer,
+            pivot
+        };
+        previewContainer._previewState = state;
+
+        camera.position.set(2.8, 2.4, 3.8);
+        camera.lookAt(0, 1, 0);
+
+        previewLoader.load(
+            modelPath,
+            (gltf) => {
+                if (!previewContainer._previewState) return;
+
+                const model = SkeletonUtils.clone(gltf.scene);
+                model.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+
+                const bounds = new THREE.Box3().setFromObject(model);
+                const size = bounds.getSize(new THREE.Vector3());
+                const center = bounds.getCenter(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z, 0.001);
+                const scale = targetSize / maxDim;
+
+                model.scale.setScalar(scale);
+                model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+                pivot.add(model);
+
+                const scaledHeight = Math.max(size.y * scale, 1);
+                const distance = Math.max(minDistance, maxDim * scale * cameraDistanceFactor);
+                camera.position.set(distance * 0.65, scaledHeight * cameraHeightFactor + yLift, distance);
+                camera.lookAt(0, scaledHeight * 0.45 + yLift, 0);
+            },
+            undefined,
+            (error) => {
+                console.warn(`Failed preview model load: ${modelPath}`, error);
+                previewContainer.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Preview unavailable</div>';
+            }
+        );
+
+        const animate = () => {
+            const activeState = previewContainer._previewState;
+            if (!activeState) return;
+            activeState.animationFrameId = requestAnimationFrame(animate);
+            activeState.pivot.rotation.y += spinSpeed;
+            activeState.renderer.render(activeState.scene, camera);
+        };
+        animate();
+    }
 
     // Controls Settings Management
     const defaultControls = {
@@ -119,74 +258,37 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('btn-avatar-back')?.addEventListener('click', () => {
+        disposePreviewRenderer(document.getElementById('avatar-preview-3d'));
         avatarScreen.classList.add('hidden');
         mainMenu.classList.remove('hidden');
     });
 
     document.getElementById('btn-car-back')?.addEventListener('click', () => {
+        disposePreviewRenderer(document.getElementById('car-preview-3d'));
         carScreen.classList.add('hidden');
         mainMenu.classList.remove('hidden');
     });
 
     // Avatar Selection Functions
     function updateAvatarUI() {
-        const selectedAvatar = localStorage.getItem('selectedAvatar') || 'panda_classic';
-        document.querySelectorAll('.selection-card').forEach(card => {
+        const selectedAvatar = resolveSelectedId('selectedAvatar', AVATAR_MODELS, DEFAULT_AVATAR_ID);
+        localStorage.setItem('selectedAvatar', selectedAvatar);
+        document.querySelectorAll('#avatar-screen .selection-card').forEach(card => {
             card.classList.toggle('active', card.dataset.id === selectedAvatar);
         });
-        
-        // Update 3D preview
-        console.log('Updating avatar preview for:', selectedAvatar);
+
         updateAvatarPreview(selectedAvatar);
     }
 
     function updateAvatarPreview(avatarType) {
-        const previewContainer = document.getElementById('avatar-preview-3d');
-        if (!previewContainer) {
-            console.log('Avatar preview container not found');
-            return;
-        }
-        
-        // Clear existing preview
-        previewContainer.innerHTML = '';
-        
-        try {
-            // Create mini scene for preview
-            const previewScene = new THREE.Scene();
-            const previewCamera = new THREE.PerspectiveCamera(50, 300/200, 0.1, 1000);
-            const previewRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            previewRenderer.setSize(300, 200);
-            previewRenderer.setClearColor(0x000000, 0);
-            previewContainer.appendChild(previewRenderer.domElement);
-            
-            // Add lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            previewScene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 10, 5);
-            previewScene.add(directionalLight);
-            
-            // Create preview avatar based on type
-            const avatarGroup = createPreviewAvatar(avatarType);
-            previewScene.add(avatarGroup);
-            
-            // Position camera
-            previewCamera.position.set(0, 2, 5);
-            previewCamera.lookAt(0, 1, 0);
-            
-            // Animation loop
-            function animatePreview() {
-                requestAnimationFrame(animatePreview);
-                avatarGroup.rotation.y += 0.01;
-                previewRenderer.render(previewScene, previewCamera);
-            }
-            animatePreview();
-            
-            console.log('Avatar preview created for:', avatarType);
-        } catch (error) {
-            console.error('Error creating avatar preview:', error);
-            previewContainer.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Preview Error</div>';
-        }
+        const avatarConfig = AVATAR_MODELS[avatarType] || AVATAR_MODELS[DEFAULT_AVATAR_ID];
+        renderModelPreview('avatar-preview-3d', avatarConfig.path, 0.012, {
+            targetSize: 9.0,
+            minDistance: 2.1,
+            cameraDistanceFactor: 0.95,
+            cameraHeightFactor: 1.05,
+            yLift: 0.35
+        });
     }
 
     function createPreviewAvatar(avatarType) {
@@ -224,63 +326,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Car Selection Functions
     function updateCarUI() {
-        const selectedCar = localStorage.getItem('selectedCar') || 'car_lamborghini';
+        const selectedCar = resolveSelectedId('selectedCar', CAR_MODELS, DEFAULT_CAR_ID);
+        localStorage.setItem('selectedCar', selectedCar);
         document.querySelectorAll('#car-screen .selection-card').forEach(card => {
             card.classList.toggle('active', card.dataset.id === selectedCar);
         });
-        
-        // Update 3D preview
-        console.log('Updating car preview for:', selectedCar);
+
         updateCarPreview(selectedCar);
     }
 
     function updateCarPreview(carType) {
-        const previewContainer = document.getElementById('car-preview-3d');
-        if (!previewContainer) {
-            console.log('Car preview container not found');
-            return;
-        }
-        
-        // Clear existing preview
-        previewContainer.innerHTML = '';
-        
-        // Create canvas for 2D car drawing
-        const canvas = document.createElement('canvas');
-        canvas.width = 320;
-        canvas.height = 200;
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        const ctx = canvas.getContext('2d');
-        
-        // Set background
-        const bgGradient = ctx.createLinearGradient(0, 0, 0, 200);
-        bgGradient.addColorStop(0, '#1a1a2e');
-        bgGradient.addColorStop(1, '#0a0a1a');
-        ctx.fillStyle = bgGradient;
-        ctx.fillRect(0, 0, 320, 200);
-        
-        // Draw car based on type
-        drawRealisticCar(ctx, carType, 0); // 0 rotation initially
-        
-        previewContainer.appendChild(canvas);
-        
-        // Animate rotation
-        let rotation = 0;
-        function animate() {
-            rotation += 0.02;
-            
-            // Clear and redraw
-            ctx.fillStyle = bgGradient;
-            ctx.fillRect(0, 0, 320, 200);
-            
-            // Draw car with rotation
-            drawRealisticCar(ctx, carType, rotation);
-            
-            requestAnimationFrame(animate);
-        }
-        animate();
-        
-        console.log('Canvas car preview created for:', carType);
+        const carConfig = CAR_MODELS[carType] || CAR_MODELS[DEFAULT_CAR_ID];
+        renderModelPreview('car-preview-3d', carConfig.path, 0.01);
     }
     
     // Draw realistic car silhouette
